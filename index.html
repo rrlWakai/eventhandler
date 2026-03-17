@@ -1,2849 +1,686 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NEXUS 2026 — Event Registration</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
-  <style>
-    /* ============================================
-       CSS CUSTOM PROPERTIES / DESIGN TOKENS
-    ============================================ */
-    :root {
-      --c-bg:          #07080d;
-      --c-surface:     #0f1117;
-      --c-surface-2:   #181c27;
-      --c-border:      rgba(255,255,255,0.07);
-      --c-border-hi:   rgba(255,255,255,0.15);
-      --c-text:        #e8eaf0;
-      --c-text-muted:  #7a7f94;
-      --c-primary:     #4f8cff;
-      --c-primary-hi:  #7eadff;
-      --c-accent:      #00e5c3;
-      --c-accent-2:    #ff5c7c;
-      --c-glow:        rgba(79,140,255,0.18);
-      --c-glow-accent: rgba(0,229,195,0.12);
-
-      --radius-sm: 6px;
-      --radius-md: 12px;
-      --radius-lg: 20px;
-      --radius-xl: 32px;
-
-      --shadow-card: 0 2px 32px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.3);
-      --shadow-glow: 0 0 40px var(--c-glow);
-
-      --font-display: 'Syne', sans-serif;
-      --font-body:    'DM Sans', sans-serif;
-
-      --nav-h: 68px;
-      --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
-    }
-
-    [data-theme="light"] {
-      --c-bg:          #f3f5fb;
-      --c-surface:     #ffffff;
-      --c-surface-2:   #edf0f8;
-      --c-border:      rgba(0,0,0,0.08);
-      --c-border-hi:   rgba(0,0,0,0.15);
-      --c-text:        #0f1117;
-      --c-text-muted:  #6b7080;
-      --c-primary:     #2b6de8;
-      --c-primary-hi:  #4f8cff;
-      --c-accent:      #00b89e;
-      --c-accent-2:    #e03058;
-      --c-glow:        rgba(43,109,232,0.1);
-      --c-glow-accent: rgba(0,184,158,0.08);
-      --shadow-card: 0 2px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05);
-    }
-
-    /* ============================================
-       RESET & BASE
-    ============================================ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; font-size: 16px; }
-
-    body {
-      font-family: var(--font-body);
-      background: var(--c-bg);
-      color: var(--c-text);
-      line-height: 1.65;
-      overflow-x: hidden;
-      transition: background var(--transition), color var(--transition);
-    }
-
-    img { max-width: 100%; display: block; }
-    a { color: inherit; text-decoration: none; }
-
-    h1,h2,h3,h4,h5 {
-      font-family: var(--font-display);
-      font-weight: 700;
-      line-height: 1.2;
-      letter-spacing: -0.02em;
-    }
-
-    section { position: relative; }
-
-    .container {
-      width: 100%;
-      max-width: 1160px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    /* ============================================
-       NOISE TEXTURE OVERLAY
-    ============================================ */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0.5;
-    }
-
-    /* ============================================
-       NAVIGATION
-    ============================================ */
-    #nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: var(--nav-h);
-      z-index: 1000;
-      transition: background var(--transition), box-shadow var(--transition), border-color var(--transition);
-    }
-
-    #nav.scrolled {
-      background: rgba(7,8,13,0.88);
-      backdrop-filter: blur(20px) saturate(1.5);
-      -webkit-backdrop-filter: blur(20px) saturate(1.5);
-      border-bottom: 1px solid var(--c-border);
-      box-shadow: 0 4px 32px rgba(0,0,0,0.3);
-    }
-
-    [data-theme="light"] #nav.scrolled {
-      background: rgba(243,245,251,0.88);
-    }
-
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 100%;
-    }
-
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 1.25rem;
-      letter-spacing: -0.03em;
-    }
-
-    .nav-logo-mark {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, var(--c-primary), var(--c-accent));
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem;
-      font-weight: 800;
-      color: #fff;
-      box-shadow: 0 0 16px var(--c-glow);
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      list-style: none;
-    }
-
-    .nav-links a {
-      padding: 6px 14px;
-      border-radius: 99px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--c-text-muted);
-      transition: color var(--transition), background var(--transition);
-    }
-
-    .nav-links a:hover {
-      color: var(--c-text);
-      background: var(--c-border);
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    /* Theme toggle */
-    .theme-toggle {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      border: 1px solid var(--c-border);
-      background: var(--c-surface);
-      color: var(--c-text-muted);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem;
-      transition: all var(--transition);
-    }
-
-    .theme-toggle:hover {
-      border-color: var(--c-primary);
-      color: var(--c-primary);
-      box-shadow: 0 0 16px var(--c-glow);
-    }
-
-    /* Burger */
-    .burger {
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      gap: 5px;
-      width: 40px; height: 40px;
-      cursor: pointer;
-      border: none;
-      background: none;
-      padding: 8px;
-    }
-
-    .burger span {
-      display: block;
-      height: 2px;
-      background: var(--c-text);
-      border-radius: 99px;
-      transition: all 0.25s ease;
-      transform-origin: center;
-    }
-
-    .burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .burger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-    .burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-    /* Mobile nav */
-    .mobile-nav {
-      display: none;
-      position: fixed;
-      top: var(--nav-h);
-      left: 0; right: 0;
-      background: var(--c-surface);
-      border-bottom: 1px solid var(--c-border);
-      padding: 16px 24px 24px;
-      z-index: 999;
-      animation: slideDown 0.25s ease;
-    }
-
-    .mobile-nav.open { display: block; }
-
-    .mobile-nav a {
-      display: block;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--c-border);
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--c-text);
-    }
-
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ============================================
-       BUTTONS
-    ============================================ */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 0.9375rem;
-      border-radius: 99px;
-      border: none;
-      cursor: pointer;
-      transition: all var(--transition);
-      outline: none;
-      white-space: nowrap;
-      text-decoration: none;
-    }
-
-    .btn:focus-visible {
-      outline: 2px solid var(--c-primary);
-      outline-offset: 3px;
-    }
-
-    .btn-primary {
-      background: var(--c-primary);
-      color: #fff;
-      padding: 13px 28px;
-      box-shadow: 0 4px 20px rgba(79,140,255,0.3);
-    }
-
-    .btn-primary:hover {
-      background: var(--c-primary-hi);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(79,140,255,0.4);
-    }
-
-    .btn-primary:active { transform: translateY(0); }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--c-text);
-      padding: 12px 26px;
-      border: 1px solid var(--c-border-hi);
-    }
-
-    .btn-outline:hover {
-      border-color: var(--c-primary);
-      color: var(--c-primary);
-      background: var(--c-glow);
-    }
-
-    .btn-accent {
-      background: var(--c-accent);
-      color: #07080d;
-      padding: 13px 28px;
-      box-shadow: 0 4px 20px var(--c-glow-accent);
-      font-weight: 600;
-    }
-
-    .btn-accent:hover {
-      filter: brightness(1.1);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(0,229,195,0.3);
-    }
-
-    .btn-lg {
-      font-size: 1rem;
-      padding: 16px 36px;
-    }
-
-    .btn-sm {
-      font-size: 0.8125rem;
-      padding: 8px 18px;
-    }
-
-    /* ============================================
-       HERO SECTION
-    ============================================ */
-    #hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      padding-top: var(--nav-h);
-      overflow: hidden;
-    }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 60% 50% at 70% 50%, rgba(79,140,255,0.12) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,229,195,0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 60% at 90% 20%, rgba(255,92,124,0.06) 0%, transparent 55%);
-    }
-
-    /* Animated grid */
-    .hero-grid {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(var(--c-border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--c-border) 1px, transparent 1px);
-      background-size: 60px 60px;
-      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 80%);
-      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 80%);
-      animation: gridPan 20s linear infinite;
-    }
-
-    @keyframes gridPan {
-      0%   { background-position: 0 0, 0 0; }
-      100% { background-position: 60px 60px, 60px 60px; }
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      max-width: 760px;
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--c-surface);
-      border: 1px solid var(--c-border-hi);
-      border-radius: 99px;
-      padding: 6px 16px 6px 8px;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: var(--c-text-muted);
-      margin-bottom: 28px;
-      animation: fadeUp 0.6s ease both;
-    }
-
-    .hero-badge-dot {
-      width: 8px; height: 8px;
-      background: var(--c-accent);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--c-accent);
-      animation: pulse 2s ease infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.6; transform: scale(0.8); }
-    }
-
-    .hero-title {
-      font-size: clamp(2.8rem, 7vw, 5.5rem);
-      font-weight: 800;
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-      margin-bottom: 12px;
-      animation: fadeUp 0.6s 0.1s ease both;
-    }
-
-    .hero-title .gradient-text {
-      background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-accent) 60%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-year {
-      display: block;
-      font-size: clamp(4rem, 12vw, 9rem);
-      font-weight: 800;
-      line-height: 0.95;
-      letter-spacing: -0.04em;
-      background: linear-gradient(180deg, var(--c-text) 40%, transparent 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 24px;
-      animation: fadeUp 0.6s 0.2s ease both;
-    }
-
-    .hero-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      align-items: center;
-      margin-bottom: 16px;
-      animation: fadeUp 0.6s 0.3s ease both;
-    }
-
-    .hero-meta-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9375rem;
-      color: var(--c-text-muted);
-    }
-
-    .hero-meta-icon {
-      width: 32px; height: 32px;
-      background: var(--c-surface);
-      border: 1px solid var(--c-border);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.85rem;
-    }
-
-    .hero-desc {
-      font-size: 1.125rem;
-      color: var(--c-text-muted);
-      max-width: 560px;
-      margin-bottom: 40px;
-      line-height: 1.7;
-      animation: fadeUp 0.6s 0.35s ease both;
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-      align-items: center;
-      animation: fadeUp 0.6s 0.45s ease both;
-    }
-
-    .hero-stat-strip {
-      display: flex;
-      gap: 32px;
-      margin-top: 60px;
-      padding-top: 32px;
-      border-top: 1px solid var(--c-border);
-      animation: fadeUp 0.6s 0.6s ease both;
-    }
-
-    .hero-stat strong {
-      display: block;
-      font-family: var(--font-display);
-      font-size: 1.75rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      color: var(--c-text);
-    }
-
-    .hero-stat span {
-      font-size: 0.8125rem;
-      color: var(--c-text-muted);
-    }
-
-    /* Floating orbs */
-    .hero-orbs {
-      position: absolute;
-      right: -60px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 540px; height: 540px;
-      pointer-events: none;
-    }
-
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      animation: orbFloat 8s ease-in-out infinite;
-    }
-
-    .orb-1 {
-      width: 300px; height: 300px;
-      background: rgba(79,140,255,0.25);
-      top: 10%; left: 10%;
-    }
-
-    .orb-2 {
-      width: 200px; height: 200px;
-      background: rgba(0,229,195,0.2);
-      bottom: 10%; right: 10%;
-      animation-delay: -3s;
-    }
-
-    .orb-3 {
-      width: 150px; height: 150px;
-      background: rgba(255,92,124,0.15);
-      top: 40%; right: 30%;
-      animation-delay: -5s;
-    }
-
-    @keyframes orbFloat {
-      0%, 100% { transform: translateY(0) scale(1); }
-      33%       { transform: translateY(-20px) scale(1.05); }
-      66%       { transform: translateY(15px) scale(0.95); }
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ============================================
-       ABOUT / HIGHLIGHTS SECTION
-    ============================================ */
-    #about {
-      padding: 100px 0;
-    }
-
-    .section-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--c-primary);
-      margin-bottom: 16px;
-    }
-
-    .section-label::before {
-      content: '';
-      width: 20px; height: 2px;
-      background: var(--c-primary);
-      border-radius: 99px;
-    }
-
-    .section-title {
-      font-size: clamp(1.875rem, 4vw, 2.75rem);
-      font-weight: 800;
-      margin-bottom: 20px;
-      letter-spacing: -0.03em;
-    }
-
-    .section-desc {
-      font-size: 1.0625rem;
-      color: var(--c-text-muted);
-      max-width: 600px;
-      line-height: 1.75;
-    }
-
-    .about-layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 64px;
-      align-items: center;
-      margin-top: 56px;
-    }
-
-    .about-text p {
-      color: var(--c-text-muted);
-      line-height: 1.8;
-      margin-bottom: 20px;
-    }
-
-    .about-text p:last-child { margin-bottom: 0; }
-
-    .highlights-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    .highlight-card {
-      background: var(--c-surface);
-      border: 1px solid var(--c-border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      transition: all var(--transition);
-      cursor: default;
-    }
-
-    .highlight-card:hover {
-      border-color: var(--c-primary);
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-glow);
-    }
-
-    .highlight-icon {
-      width: 44px; height: 44px;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.25rem;
-      margin-bottom: 14px;
-    }
-
-    .highlight-icon.blue  { background: rgba(79,140,255,0.15); }
-    .highlight-icon.teal  { background: rgba(0,229,195,0.15); }
-    .highlight-icon.pink  { background: rgba(255,92,124,0.15); }
-    .highlight-icon.gold  { background: rgba(255,193,7,0.15); }
-
-    .highlight-card h4 {
-      font-size: 0.9375rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .highlight-card p {
-      font-size: 0.8125rem;
-      color: var(--c-text-muted);
-      line-height: 1.6;
-    }
-
-    /* ============================================
-       REGISTRATION FORM
-    ============================================ */
-    #register {
-      padding: 100px 0;
-      background: var(--c-surface);
-    }
-
-    [data-theme="light"] #register {
-      background: var(--c-surface-2);
-    }
-
-    .form-wrap {
-      max-width: 720px;
-      margin: 56px auto 0;
-      background: var(--c-bg);
-      border: 1px solid var(--c-border);
-      border-radius: var(--radius-xl);
-      overflow: hidden;
-      box-shadow: var(--shadow-card);
-    }
-
-    [data-theme="light"] .form-wrap {
-      background: var(--c-surface);
-    }
-
-    /* Progress Bar */
-    .form-progress {
-      padding: 28px 36px 0;
-    }
-
-    .progress-steps {
-      display: flex;
-      align-items: center;
-      gap: 0;
-    }
-
-    .progress-step {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex: 1;
-      position: relative;
-    }
-
-    .progress-step:not(:last-child)::after {
-      content: '';
-      flex: 1;
-      height: 2px;
-      background: var(--c-border);
-      margin: 0 8px;
-      transition: background 0.4s;
-    }
-
-    .progress-step.completed::after {
-      background: var(--c-primary);
-    }
-
-    .step-num {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem;
-      font-weight: 700;
-      border: 2px solid var(--c-border);
-      background: var(--c-surface);
-      color: var(--c-text-muted);
-      transition: all 0.3s;
-      flex-shrink: 0;
-    }
-
-    .progress-step.active .step-num {
-      border-color: var(--c-primary);
-      background: var(--c-primary);
-      color: #fff;
-      box-shadow: 0 0 16px var(--c-glow);
-    }
-
-    .progress-step.completed .step-num {
-      border-color: var(--c-primary);
-      background: var(--c-primary);
-      color: #fff;
-    }
-
-    .step-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--c-text-muted);
-      white-space: nowrap;
-    }
-
-    .progress-step.active .step-label { color: var(--c-text); }
-
-    /* Form panels */
-    .form-body {
-      padding: 32px 36px 36px;
-    }
-
-    .form-panel { display: none; }
-    .form-panel.active {
-      display: block;
-      animation: panelIn 0.35s ease both;
-    }
-
-    @keyframes panelIn {
-      from { opacity: 0; transform: translateX(20px); }
-      to   { opacity: 1; transform: translateX(0); }
-    }
-
-    .form-panel-title {
-      font-size: 1.375rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .form-panel-desc {
-      font-size: 0.875rem;
-      color: var(--c-text-muted);
-      margin-bottom: 28px;
-    }
-
-    /* Form fields */
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .form-row.single { grid-template-columns: 1fr; }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group:last-child { margin-bottom: 0; }
-
-    label {
-      display: block;
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: var(--c-text);
-      margin-bottom: 8px;
-      letter-spacing: 0.01em;
-    }
-
-    label .req {
-      color: var(--c-accent-2);
-      margin-left: 2px;
-    }
-
-    .input-wrap {
-      position: relative;
-    }
-
-    .input-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--c-text-muted);
-      font-size: 0.9rem;
-      pointer-events: none;
-      transition: color var(--transition);
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    select,
-    textarea {
-      width: 100%;
-      background: var(--c-surface);
-      border: 1.5px solid var(--c-border);
-      border-radius: var(--radius-md);
-      padding: 12px 14px;
-      font-family: var(--font-body);
-      font-size: 0.9375rem;
-      color: var(--c-text);
-      transition: all var(--transition);
-      outline: none;
-      appearance: none;
-    }
-
-    [data-theme="light"] input[type="text"],
-    [data-theme="light"] input[type="email"],
-    [data-theme="light"] input[type="tel"],
-    [data-theme="light"] select,
-    [data-theme="light"] textarea {
-      background: var(--c-surface-2);
-    }
-
-    .has-icon input,
-    .has-icon select {
-      padding-left: 42px;
-    }
-
-    input::placeholder, textarea::placeholder { color: var(--c-text-muted); }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: var(--c-primary);
-      box-shadow: 0 0 0 3px var(--c-glow);
-    }
-
-    input:focus ~ .input-icon,
-    select:focus ~ .input-icon {
-      color: var(--c-primary);
-    }
-
-    /* Invalid state */
-    input.invalid,
-    select.invalid {
-      border-color: var(--c-accent-2) !important;
-      box-shadow: 0 0 0 3px rgba(255,92,124,0.12) !important;
-    }
-
-    .field-error {
-      font-size: 0.75rem;
-      color: var(--c-accent-2);
-      margin-top: 6px;
-      display: none;
-    }
-
-    .field-error.show { display: block; }
-
-    /* Select custom arrow */
-    select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7f94' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      padding-right: 40px;
-      cursor: pointer;
-    }
-
-    select option {
-      background: var(--c-surface);
-      color: var(--c-text);
-    }
-
-    textarea { resize: vertical; min-height: 100px; }
-
-    /* Checkboxes / workshop selection */
-    .check-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .check-item {
-      position: relative;
-    }
-
-    .check-item input[type="checkbox"] {
-      position: absolute;
-      opacity: 0;
-      width: 0; height: 0;
-    }
-
-    .check-label {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 14px 16px;
-      border: 1.5px solid var(--c-border);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      transition: all var(--transition);
-    }
-
-    .check-label:hover {
-      border-color: var(--c-border-hi);
-      background: var(--c-surface);
-    }
-
-    .check-item input:checked + .check-label {
-      border-color: var(--c-primary);
-      background: var(--c-glow);
-    }
-
-    .check-box {
-      width: 18px; height: 18px;
-      flex-shrink: 0;
-      border: 2px solid var(--c-border);
-      border-radius: 5px;
-      margin-top: 1px;
-      display: flex; align-items: center; justify-content: center;
-      transition: all var(--transition);
-    }
-
-    .check-item input:checked + .check-label .check-box {
-      background: var(--c-primary);
-      border-color: var(--c-primary);
-    }
-
-    .check-box::after {
-      content: '✓';
-      font-size: 0.7rem;
-      color: white;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .check-item input:checked + .check-label .check-box::after { opacity: 1; }
-
-    .check-text strong {
-      display: block;
-      font-size: 0.8125rem;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-
-    .check-text span {
-      font-size: 0.75rem;
-      color: var(--c-text-muted);
-    }
-
-    /* Workshop info box */
-    .workshop-info {
-      background: var(--c-surface);
-      border: 1px solid var(--c-border);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
-      margin-top: 14px;
-      font-size: 0.8125rem;
-      color: var(--c-text-muted);
-      line-height: 1.6;
-      display: none;
-      animation: fadeIn 0.25s ease;
-    }
-
-    .workshop-info.show { display: block; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Size selection */
-    .size-grid {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .size-item input[type="radio"] { position: absolute; opacity: 0; }
-
-    .size-label {
-      width: 52px; height: 44px;
-      display: flex; align-items: center; justify-content: center;
-      border: 1.5px solid var(--c-border);
-      border-radius: var(--radius-md);
-      font-size: 0.8125rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all var(--transition);
-    }
-
-    .size-label:hover { border-color: var(--c-primary); color: var(--c-primary); }
-    .size-item input:checked + .size-label {
-      border-color: var(--c-primary);
-      background: var(--c-primary);
-      color: #fff;
-    }
-
-    /* Form navigation */
-    .form-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 32px;
-      padding-top: 24px;
-      border-top: 1px solid var(--c-border);
-    }
-
-    /* ============================================
-       CONFIRMATION
-    ============================================ */
-    #confirmation {
-      display: none;
-      padding: 100px 0;
-      text-align: center;
-    }
-
-    #confirmation.show { display: block; }
-
-    .confirm-icon {
-      width: 80px; height: 80px;
-      background: linear-gradient(135deg, var(--c-primary), var(--c-accent));
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2rem;
-      margin: 0 auto 28px;
-      box-shadow: 0 0 40px var(--c-glow);
-      animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
-    }
-
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.5); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-
-    .confirm-title {
-      font-size: 2.25rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 12px;
-      animation: fadeUp 0.5s 0.2s ease both;
-    }
-
-    .confirm-desc {
-      font-size: 1.0625rem;
-      color: var(--c-text-muted);
-      max-width: 480px;
-      margin: 0 auto 36px;
-      line-height: 1.7;
-      animation: fadeUp 0.5s 0.3s ease both;
-    }
-
-    .confirm-card {
-      display: inline-block;
-      background: var(--c-surface);
-      border: 1px solid var(--c-border);
-      border-radius: var(--radius-lg);
-      padding: 24px 36px;
-      margin-bottom: 40px;
-      text-align: left;
-      animation: fadeUp 0.5s 0.4s ease both;
-    }
-
-    .confirm-detail {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.9375rem;
-      margin-bottom: 12px;
-    }
-
-    .confirm-detail:last-child { margin-bottom: 0; }
-
-    .confirm-detail-label {
-      color: var(--c-text-muted);
-      min-width: 100px;
-      font-size: 0.8125rem;
-    }
-
-    .confirm-detail-value {
-      font-weight: 600;
-    }
-
-    .share-section {
-      animation: fadeUp 0.5s 0.5s ease both;
-    }
-
-    .share-section p {
-      font-size: 0.875rem;
-      color: var(--c-text-muted);
-      margin-bottom: 16px;
-    }
-
-    .share-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-    }
-
-    .share-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      border-radius: 99px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      border: 1px solid var(--c-border);
-      cursor: pointer;
-      background: var(--c-surface);
-      color: var(--c-text);
-      transition: all var(--transition);
-    }
-
-    .share-btn:hover {
-      border-color: var(--c-primary);
-      background: var(--c-glow);
-    }
-
-    /* ============================================
-       SCHEDULE / TIMELINE
-    ============================================ */
-    #schedule {
-      padding: 100px 0;
-    }
-
-    .timeline {
-      margin-top: 56px;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 20px;
-      top: 0; bottom: 0;
-      width: 2px;
-      background: linear-gradient(to bottom, var(--c-primary), var(--c-accent), transparent);
-    }
-
-    .timeline-item {
-      display: flex;
-      gap: 28px;
-      align-items: flex-start;
-      padding: 0 0 36px 0;
-      padding-left: 60px;
-      position: relative;
-    }
-
-    .timeline-dot {
-      position: absolute;
-      left: 10px;
-      top: 2px;
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.7rem;
-      color: #fff;
-      flex-shrink: 0;
-      border: 3px solid var(--c-bg);
-    }
-
-    [data-theme="light"] .timeline-dot { border-color: var(--c-bg); }
-
-    .timeline-dot.type-keynote  { background: var(--c-primary); }
-    .timeline-dot.type-workshop { background: var(--c-accent); }
-    .timeline-dot.type-social   { background: var(--c-accent-2); }
-    .timeline-dot.type-lunch    { background: #f0c040; }
-
-    .timeline-time {
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: var(--c-text-muted);
-      min-width: 90px;
-      padding-top: 3px;
-    }
-
-    .timeline-content {
-      background: var(--c-surface);
-      border: 1px solid var(--c-border);
-      border-radius: var(--radius-md);
-      padding: 16px 20px;
-      flex: 1;
-      transition: all var(--transition);
-    }
-
-    .timeline-content:hover {
-      border-color: var(--c-primary);
-      transform: translateX(4px);
-    }
-
-    .timeline-content h4 {
-      font-size: 0.9375rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .timeline-content p {
-      font-size: 0.8125rem;
-      color: var(--c-text-muted);
-      line-height: 1.5;
-    }
-
-    .timeline-tag {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 99px;
-      font-size: 0.6875rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-top: 8px;
-    }
-
-    .tag-keynote  { background: rgba(79,140,255,0.15); color: var(--c-primary); }
-    .tag-workshop { background: rgba(0,229,195,0.15); color: var(--c-accent); }
-    .tag-social   { background: rgba(255,92,124,0.15); color: var(--c-accent-2); }
-    .tag-lunch    { background: rgba(240,192,64,0.15); color: #c49a00; }
-
-    /* Day tabs */
-    .day-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 32px;
-    }
-
-    .day-tab {
-      padding: 8px 20px;
-      border-radius: 99px;
-      border: 1.5px solid var(--c-border);
-      background: transparent;
-      color: var(--c-text-muted);
-      font-family: var(--font-body);
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all var(--transition);
-    }
-
-    .day-tab.active,
-    .day-tab:hover {
-      border-color: var(--c-primary);
-      color: var(--c-primary);
-      background: var(--c-glow);
-    }
-
-    .day-schedule { display: none; }
-    .day-schedule.active { display: block; }
-
-    /* ============================================
-       FAQ
-    ============================================ */
-    #faq {
-      padding: 100px 0;
-      background: var(--c-surface);
-    }
-
-    [data-theme="light"] #faq {
-      background: var(--c-surface-2);
-    }
-
-    .faq-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 56px;
-    }
-
-    .faq-item {
-      border: 1px solid var(--c-border);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      transition: border-color var(--transition);
-    }
-
-    .faq-item.open { border-color: var(--c-primary); }
-
-    .faq-q {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 18px 20px;
-      cursor: pointer;
-      background: var(--c-bg);
-      font-size: 0.9375rem;
-      font-weight: 600;
-      transition: background var(--transition);
-      user-select: none;
-    }
-
-    [data-theme="light"] .faq-q { background: var(--c-surface); }
-
-    .faq-q:hover { background: var(--c-surface); }
-    [data-theme="light"] .faq-q:hover { background: var(--c-surface-2); }
-
-    .faq-icon {
-      width: 28px; height: 28px;
-      flex-shrink: 0;
-      border: 1.5px solid var(--c-border);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
-      color: var(--c-text-muted);
-      transition: all var(--transition);
-    }
-
-    .faq-item.open .faq-icon {
-      border-color: var(--c-primary);
-      color: var(--c-primary);
-      transform: rotate(45deg);
-    }
-
-    .faq-a {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.35s ease, padding 0.35s ease;
-      background: var(--c-bg);
-    }
-
-    [data-theme="light"] .faq-a { background: var(--c-surface); }
-
-    .faq-item.open .faq-a { max-height: 300px; }
-
-    .faq-a-inner {
-      padding: 0 20px 18px;
-      font-size: 0.875rem;
-      color: var(--c-text-muted);
-      line-height: 1.75;
-      border-top: 1px solid var(--c-border);
-      padding-top: 14px;
-    }
-
-    .support-box {
-      margin-top: 48px;
-      background: var(--c-bg);
-      border: 1px solid var(--c-border);
-      border-radius: var(--radius-lg);
-      padding: 36px;
-      display: flex;
-      align-items: center;
-      gap: 32px;
-    }
-
-    [data-theme="light"] .support-box { background: var(--c-surface); }
-
-    .support-icon {
-      width: 64px; height: 64px;
-      border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--c-primary), var(--c-accent));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.75rem;
-      flex-shrink: 0;
-    }
-
-    .support-text h3 {
-      font-size: 1.125rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .support-text p {
-      font-size: 0.875rem;
-      color: var(--c-text-muted);
-      margin-bottom: 16px;
-    }
-
-    .support-contacts {
-      display: flex;
-      gap: 20px;
-      font-size: 0.875rem;
-    }
-
-    .support-contact {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--c-primary);
-      font-weight: 500;
-    }
-
-    /* ============================================
-       FOOTER
-    ============================================ */
-    footer {
-      background: var(--c-bg);
-      border-top: 1px solid var(--c-border);
-      padding: 56px 0 32px;
-    }
-
-    .footer-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 40px;
-      margin-bottom: 40px;
-    }
-
-    .footer-brand p {
-      margin-top: 12px;
-      font-size: 0.875rem;
-      color: var(--c-text-muted);
-      max-width: 260px;
-      line-height: 1.7;
-    }
-
-    .footer-links-group h5 {
-      font-size: 0.8125rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--c-text-muted);
-      margin-bottom: 14px;
-    }
-
-    .footer-links-group a {
-      display: block;
-      font-size: 0.875rem;
-      color: var(--c-text-muted);
-      margin-bottom: 10px;
-      transition: color var(--transition);
-    }
-
-    .footer-links-group a:hover { color: var(--c-text); }
-
-    .footer-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 28px;
-      border-top: 1px solid var(--c-border);
-      font-size: 0.8125rem;
-      color: var(--c-text-muted);
-    }
-
-    /* ============================================
-       MODAL
-    ============================================ */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.65);
-      backdrop-filter: blur(8px);
-      z-index: 2000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-
-    .modal-overlay.open {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .modal {
-      background: var(--c-surface);
-      border: 1px solid var(--c-border);
-      border-radius: var(--radius-xl);
-      padding: 40px;
-      max-width: 480px;
-      width: 100%;
-      box-shadow: var(--shadow-card);
-      transform: scale(0.9) translateY(20px);
-      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    }
-
-    .modal-overlay.open .modal {
-      transform: scale(1) translateY(0);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
-    }
-
-    .modal-close {
-      width: 32px; height: 32px;
-      border: 1px solid var(--c-border);
-      border-radius: 50%;
-      background: transparent;
-      color: var(--c-text-muted);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
-      transition: all var(--transition);
-    }
-
-    .modal-close:hover {
-      border-color: var(--c-accent-2);
-      color: var(--c-accent-2);
-    }
-
-    .modal h3 {
-      font-size: 1.375rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-
-    .modal p {
-      font-size: 0.9375rem;
-      color: var(--c-text-muted);
-      line-height: 1.7;
-      margin-bottom: 24px;
-    }
-
-    /* ============================================
-       SCROLL REVEAL
-    ============================================ */
-    .reveal {
-      opacity: 0;
-      transform: translateY(32px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-
-    .reveal.in-view {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
-    .reveal-delay-4 { transition-delay: 0.4s; }
-
-    /* ============================================
-       RESPONSIVE
-    ============================================ */
-    @media (max-width: 900px) {
-      .nav-links { display: none; }
-      .burger { display: flex; }
-
-      .about-layout { grid-template-columns: 1fr; gap: 40px; }
-      .faq-grid { grid-template-columns: 1fr; }
-
-      .footer-top {
-        flex-wrap: wrap;
-        gap: 32px;
-      }
-
-      .hero-orbs { display: none; }
-      .hero-stat-strip { gap: 20px; }
-    }
-
-    @media (max-width: 640px) {
-      .form-row { grid-template-columns: 1fr; }
-      .check-grid { grid-template-columns: 1fr; }
-      .form-body { padding: 24px 20px 28px; }
-      .form-progress { padding: 20px 20px 0; }
-      .step-label { display: none; }
-
-      .hero-actions { flex-direction: column; align-items: flex-start; }
-      .hero-stat-strip { flex-wrap: wrap; gap: 16px; }
-
-      .support-box { flex-direction: column; text-align: center; }
-      .support-contacts { justify-content: center; flex-wrap: wrap; }
-
-      .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
-
-      .day-tabs { flex-wrap: wrap; }
-
-      .confirm-card { padding: 20px 24px; }
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CCS Week 2026 — Empowering Future Innovators</title>
+  <meta name="description" content="Join CCS Week 2026 — a flagship event series empowering the next generation of tech innovators." />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Lucide Icons (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.344.0/umd/lucide.min.js" defer></script>
+  <!-- Main Script -->
+  <script src="script.js" defer></script>
 </head>
 <body>
 
-  <!-- ============================================
-       NAVIGATION
-  ============================================ -->
-  <nav id="nav" role="navigation" aria-label="Main navigation">
-    <div class="container">
-      <div class="nav-inner">
-        <a href="#hero" class="nav-logo" aria-label="NEXUS 2026 Home">
-          <div class="nav-logo-mark" aria-hidden="true">NX</div>
-          NEXUS 2026
-        </a>
+  <!-- ============================================================
+       NAVBAR
+  ============================================================ -->
+  <header class="navbar" id="navbar">
+    <div class="navbar__inner">
+      <a href="#home" class="navbar__logo" aria-label="CCS Week 2026 Home">
+        <img src="logo.jpg" alt="CCS Week Logo" class="navbar__logo-mark" />
 
-        <ul class="nav-links" role="list">
-          <li><a href="#about">About</a></li>
-          <li><a href="#register">Register</a></li>
-          <li><a href="#schedule">Schedule</a></li>
-          <li><a href="#faq">FAQ</a></li>
+        <span class="navbar__logo-text">CCS WEEK <em>2026</em></span>
+      </a>
+
+      <nav class="navbar__nav" id="navMenu" role="navigation" aria-label="Main navigation">
+        <ul class="navbar__links">
+          <li><a href="#home"          class="navbar__link" data-nav>Home</a></li>
+          <li><a href="#about"         class="navbar__link" data-nav>About</a></li>
+          <li><a href="#documentation" class="navbar__link" data-nav>Documentation</a></li>
+          <li><a href="#schedule"      class="navbar__link" data-nav>Schedule</a></li>
+          <li><a href="#register"      class="navbar__link navbar__link--cta" data-nav>Register</a></li>
         </ul>
+      </nav>
 
-        <div class="nav-actions">
-          <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Toggle theme">🌙</button>
-          <a href="#register" class="btn btn-primary btn-sm" style="border-radius: var(--radius-md);">Register Now</a>
-          <button class="burger" id="burgerBtn" aria-label="Toggle mobile menu" aria-expanded="false">
-            <span></span><span></span><span></span>
-          </button>
+      <button class="navbar__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="navMenu">
+        <span class="hamburger__bar"></span>
+        <span class="hamburger__bar"></span>
+        <span class="hamburger__bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============================================================
+         HERO SECTION
+    ============================================================ -->
+    <section class="hero" id="home">
+      <div class="hero__bg-grid" aria-hidden="true"></div>
+      <div class="container hero__container">
+
+        <!-- Left: Text Content -->
+        <div class="hero__content">
+          <div class="hero__badge">
+            <i data-lucide="calendar-days"></i>
+            <span>March 23 – 28, 2026</span>
+          </div>
+          <h1 class="hero__title">
+            CCS Week<br />
+            <span class="hero__title-accent">2026</span>
+          </h1>
+          <p class="hero__subtitle">Empowering Future Innovators</p>
+          <p class="hero__description">
+            Six days of immersive competitions, workshops, and networking events
+            designed for students in the College of Computer Studies. Build, create,
+            and connect with the brightest minds in tech.
+          </p>
+          <div class="hero__stats">
+            <div class="hero__stat">
+              <span class="hero__stat-number">12+</span>
+              <span class="hero__stat-label">Events</span>
+            </div>
+            <div class="hero__stat-divider" aria-hidden="true"></div>
+            <div class="hero__stat">
+              <span class="hero__stat-number">500+</span>
+              <span class="hero__stat-label">Participants</span>
+            </div>
+            <div class="hero__stat-divider" aria-hidden="true"></div>
+            <div class="hero__stat">
+              <span class="hero__stat-number">6</span>
+              <span class="hero__stat-label">Days</span>
+            </div>
+          </div>
+          <div class="hero__actions">
+            <a href="#register" class="btn btn--primary" data-nav>
+              <i data-lucide="pen-line"></i>
+              Register Now
+            </a>
+            <a href="#about" class="btn btn--ghost" data-nav>
+              <i data-lucide="info"></i>
+              Learn More
+            </a>
+          </div>
         </div>
+
+        <!-- Right: Visual Illustration -->
+        <div class="hero__visual" aria-hidden="true">
+          <div class="hero__card-stack">
+            <div class="hero__float-card hero__float-card--1">
+              <i data-lucide="code-2"></i>
+              <span>Hackathon</span>
+            </div>
+            <div class="hero__float-card hero__float-card--2">
+              <i data-lucide="cpu"></i>
+              <span>AI Exhibit</span>
+            </div>
+            <div class="hero__float-card hero__float-card--3">
+              <i data-lucide="trophy"></i>
+              <span>Awards Night</span>
+            </div>
+            <div class="hero__main-card">
+              <div class="hero__main-card-inner">
+                <div class="hero__main-icon-wrap">
+                  <i data-lucide="zap"></i>
+                </div>
+                <p class="hero__main-card-title">CCS Week</p>
+                <p class="hero__main-card-year">2026</p>
+                <div class="hero__main-card-bar"></div>
+                <p class="hero__main-card-sub">College of Computer Studies</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Decorative wave -->
+      <div class="hero__wave" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="var(--bg)"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ============================================================
+     ABOUT SECTION
+============================================================ -->
+<section class="about section" id="about">
+  <div class="container about__container">
+
+    <!-- IMAGE -->
+    <div class="about__image reveal">
+      <div class="about__img-frame">
+        <img 
+          src="about.png" 
+          alt="CCS Community Illustration"
+          class="about__img"
+        />
+        <div class="about__img-deco about__img-deco--1"></div>
+        <div class="about__img-deco about__img-deco--2"></div>
       </div>
     </div>
-  </nav>
 
-  <!-- Mobile nav -->
-  <div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation">
-    <a href="#about"    onclick="closeMobileNav()">About</a>
-    <a href="#register" onclick="closeMobileNav()">Register</a>
-    <a href="#schedule" onclick="closeMobileNav()">Schedule</a>
-    <a href="#faq"      onclick="closeMobileNav()">FAQ</a>
-    <a href="#register" class="btn btn-primary" style="margin-top:16px;display:inline-flex;" onclick="closeMobileNav()">Register Now</a>
+    <!-- CONTENT -->
+    <div class="about__content reveal">
+      <div class="section__eyebrow">
+        <i data-lucide="sparkles"></i>
+        About the Event
+      </div>
+      <h2 class="section__title">A Week Built for Builders</h2>
+      <p class="about__text">
+        CCS Week is the premier annual event of the College of Computer Studies —
+        a celebration of technology, creativity, and community. Every edition brings
+        together students, faculty, and industry professionals for six days of meaningful
+        competition and collaboration.
+      </p>
+      <p class="about__text">
+        Whether you're a developer, designer, data scientist, or just curious about
+        what's possible with technology, CCS Week has an event made for you.
+      </p>
+      <ul class="about__features">
+        <li class="about__feature">
+          <span class="about__feature-icon"><i data-lucide="check-circle-2"></i></span>
+          Open to all CCS students across all year levels
+        </li>
+        <li class="about__feature">
+          <span class="about__feature-icon"><i data-lucide="check-circle-2"></i></span>
+          Prizes, certificates, and industry recognition
+        </li>
+        <li class="about__feature">
+          <span class="about__feature-icon"><i data-lucide="check-circle-2"></i></span>
+          Free registration for all official participants
+        </li>
+      </ul>
+    </div>
+
   </div>
+</section>
+    <!-- ============================================================
+         DOCUMENTATION SECTION (Gallery)
+    ============================================================ -->
+    <section class="documentation section section--alt" id="documentation">
+      <div class="container">
+        <div class="section__header reveal">
+          <div class="section__eyebrow">
+            <i data-lucide="image"></i>
+            Documentation
+          </div>
+          <h2 class="section__title">Memories from Past Events</h2>
+          <p class="section__subtitle">
+            Relive the highlights from previous CCS Week editions — the energy, the
+            creativity, and the camaraderie.
+          </p>
+        </div>
 
-  <!-- ============================================
-       HERO
-  ============================================ -->
-  <section id="hero" aria-labelledby="hero-heading">
-    <div class="hero-bg" aria-hidden="true"></div>
-    <div class="hero-grid" aria-hidden="true"></div>
+        <div class="gallery" id="gallery">
 
-    <div class="hero-orbs" aria-hidden="true">
-      <div class="orb orb-1"></div>
-      <div class="orb orb-2"></div>
-      <div class="orb orb-3"></div>
+          <div class="gallery__item reveal" data-title="Hackathon 2025" data-caption="72-hour non-stop coding battle with over 80 competing teams.">
+            <div class="gallery__img-wrap">
+              <div class="gallery__placeholder">
+                <i data-lucide="code-2"></i>
+              </div>
+              <div class="gallery__overlay">
+                <div class="gallery__overlay-content">
+                  <h3 class="gallery__overlay-title">Hackathon 2025</h3>
+                  <p class="gallery__overlay-caption">72-hour non-stop coding battle</p>
+                  <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gallery__item reveal" data-title="AI Exhibit" data-caption="Students showcased machine learning projects and AI-powered prototypes.">
+            <div class="gallery__img-wrap">
+              <div class="gallery__placeholder gallery__placeholder--2">
+                <i data-lucide="brain-circuit"></i>
+              </div>
+              <div class="gallery__overlay">
+                <div class="gallery__overlay-content">
+                  <h3 class="gallery__overlay-title">AI Exhibit</h3>
+                  <p class="gallery__overlay-caption">Machine learning showcases</p>
+                  <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gallery__item reveal" data-title="Web Dev Cup" data-caption="A fast-paced competition where teams built full-stack apps from scratch in 4 hours.">
+            <div class="gallery__img-wrap">
+              <div class="gallery__placeholder gallery__placeholder--3">
+                <i data-lucide="globe"></i>
+              </div>
+              <div class="gallery__overlay">
+                <div class="gallery__overlay-content">
+                  <h3 class="gallery__overlay-title">Web Dev Cup</h3>
+                  <p class="gallery__overlay-caption">Full-stack speed challenge</p>
+                  <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gallery__item reveal" data-title="Tech Talk Series" data-caption="Industry leaders and alumni shared insights on emerging technologies.">
+            <div class="gallery__img-wrap">
+              <div class="gallery__placeholder gallery__placeholder--4">
+                <i data-lucide="mic-2"></i>
+              </div>
+              <div class="gallery__overlay">
+                <div class="gallery__overlay-content">
+                  <h3 class="gallery__overlay-title">Tech Talk Series</h3>
+                  <p class="gallery__overlay-caption">Industry leader insights</p>
+                  <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gallery__item reveal" data-title="Design Sprint" data-caption="UI/UX designers competed to prototype and present solutions in under 6 hours.">
+            <div class="gallery__img-wrap">
+              <div class="gallery__placeholder gallery__placeholder--5">
+                <i data-lucide="pen-tool"></i>
+              </div>
+              <div class="gallery__overlay">
+                <div class="gallery__overlay-content">
+                  <h3 class="gallery__overlay-title">Design Sprint</h3>
+                  <p class="gallery__overlay-caption">UI/UX rapid prototyping</p>
+                  <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gallery__item reveal" data-title="Awards Night" data-caption="Celebrating the winners, the builders, and everyone who made CCS Week unforgettable.">
+            <div class="gallery__img-wrap">
+              <div class="gallery__placeholder gallery__placeholder--6">
+                <i data-lucide="trophy"></i>
+              </div>
+              <div class="gallery__overlay">
+                <div class="gallery__overlay-content">
+                  <h3 class="gallery__overlay-title">Awards Night</h3>
+                  <p class="gallery__overlay-caption">Celebrating our champions</p>
+                  <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /gallery -->
+      </div>
+    </section>
+
+    <!-- ============================================================
+         LIGHTBOX MODAL
+    ============================================================ -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview" hidden>
+      <div class="lightbox__backdrop" id="lightboxBackdrop"></div>
+      <div class="lightbox__content">
+        <button class="lightbox__close" id="lightboxClose" aria-label="Close preview">
+          <i data-lucide="x"></i>
+        </button>
+        <div class="lightbox__img-wrap" id="lightboxImgWrap">
+          <!-- Dynamic placeholder inserted by JS -->
+        </div>
+        <div class="lightbox__info">
+          <h3 class="lightbox__title" id="lightboxTitle"></h3>
+          <p  class="lightbox__caption" id="lightboxCaption"></p>
+        </div>
+      </div>
     </div>
 
-    <div class="container">
-      <div class="hero-content">
-        <div class="hero-badge" role="status" aria-label="Registration now open">
-          <div class="hero-badge-dot"></div>
-          Registration now open
+    <!-- ============================================================
+         SCHEDULE SECTION
+    ============================================================ -->
+    <section class="schedule section" id="schedule">
+      <div class="container">
+        <div class="section__header reveal">
+          <div class="section__eyebrow">
+            <i data-lucide="calendar-check"></i>
+            Schedule
+          </div>
+          <h2 class="section__title">Six Days of Innovation</h2>
+          <p class="section__subtitle">
+            Every day packed with something to compete in, learn from, or simply enjoy.
+          </p>
         </div>
 
-        <h1 class="hero-title" id="hero-heading">
-          Welcome to<br>
-          <span class="gradient-text">NEXUS</span>
-        </h1>
-        <span class="hero-year" aria-hidden="true">2026</span>
+        <div class="timeline">
 
-        <div class="hero-meta" aria-label="Event details">
-          <div class="hero-meta-item">
-            <div class="hero-meta-icon" aria-hidden="true">📅</div>
-            <span>April 18–20, 2026</span>
+          <div class="timeline__item reveal">
+            <div class="timeline__marker">
+              <span class="timeline__day">Day 1</span>
+              <div class="timeline__dot"><i data-lucide="flag"></i></div>
+            </div>
+            <div class="timeline__card">
+              <span class="timeline__date">Monday, Mar 23</span>
+              <h3 class="timeline__title">Opening Ceremony & Kickoff</h3>
+              <p class="timeline__desc">Welcome remarks, event orientation, and the official start of CCS Week 2026. Meet your teams, collect your kits, and gear up.</p>
+              <div class="timeline__tags">
+                <span class="tag"><i data-lucide="map-pin"></i> Main Auditorium</span>
+                <span class="tag"><i data-lucide="clock"></i> 8:00 AM</span>
+              </div>
+            </div>
           </div>
-          <div class="hero-meta-item">
-            <div class="hero-meta-icon" aria-hidden="true">📍</div>
-            <span>BGC, Taguig City, Philippines</span>
+
+          <div class="timeline__item reveal">
+            <div class="timeline__marker">
+              <span class="timeline__day">Day 2</span>
+              <div class="timeline__dot"><i data-lucide="code-2"></i></div>
+            </div>
+            <div class="timeline__card">
+              <span class="timeline__date">Tuesday, Mar 24</span>
+              <h3 class="timeline__title">Hackathon Begins + AI Exhibit</h3>
+              <p class="timeline__desc">72-hour hackathon launches at noon. Alongside it, the AI Exhibit opens for public viewing — featuring student-built ML and AI projects.</p>
+              <div class="timeline__tags">
+                <span class="tag"><i data-lucide="map-pin"></i> CCS Lab Complex</span>
+                <span class="tag"><i data-lucide="clock"></i> 12:00 PM</span>
+              </div>
+            </div>
           </div>
-          <div class="hero-meta-item">
-            <div class="hero-meta-icon" aria-hidden="true">🏛️</div>
-            <span>Bonifacio Global City Convention Center</span>
+
+          <div class="timeline__item reveal">
+            <div class="timeline__marker">
+              <span class="timeline__day">Day 3</span>
+              <div class="timeline__dot"><i data-lucide="pen-tool"></i></div>
+            </div>
+            <div class="timeline__card">
+              <span class="timeline__date">Wednesday, Mar 25</span>
+              <h3 class="timeline__title">Design Sprint & Web Dev Cup</h3>
+              <p class="timeline__desc">Back-to-back design and development competitions. Morning slots for Design Sprint, afternoon for Web Dev Cup. Speed, creativity, execution.</p>
+              <div class="timeline__tags">
+                <span class="tag"><i data-lucide="map-pin"></i> CCS Rooms 201–204</span>
+                <span class="tag"><i data-lucide="clock"></i> 9:00 AM – 5:00 PM</span>
+              </div>
+            </div>
           </div>
+
+          <div class="timeline__item reveal">
+            <div class="timeline__marker">
+              <span class="timeline__day">Day 4</span>
+              <div class="timeline__dot"><i data-lucide="mic-2"></i></div>
+            </div>
+            <div class="timeline__card">
+              <span class="timeline__date">Thursday, Mar 26</span>
+              <h3 class="timeline__title">Tech Talk Series</h3>
+              <p class="timeline__desc">Three keynote sessions from industry leaders and distinguished alumni covering AI, cybersecurity, and the future of software development.</p>
+              <div class="timeline__tags">
+                <span class="tag"><i data-lucide="map-pin"></i> Main Auditorium</span>
+                <span class="tag"><i data-lucide="clock"></i> 10:00 AM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline__item reveal">
+            <div class="timeline__marker">
+              <span class="timeline__day">Day 5</span>
+              <div class="timeline__dot"><i data-lucide="flag-triangle-right"></i></div>
+            </div>
+            <div class="timeline__card">
+              <span class="timeline__date">Friday, Mar 27</span>
+              <h3 class="timeline__title">Hackathon Finale & Presentations</h3>
+              <p class="timeline__desc">Teams present their 72-hour builds to a panel of judges. Final pitches, demos, and live Q&A before the winners are announced.</p>
+              <div class="timeline__tags">
+                <span class="tag"><i data-lucide="map-pin"></i> CCS Gymnasium</span>
+                <span class="tag"><i data-lucide="clock"></i> 12:00 PM – 6:00 PM</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline__item reveal">
+            <div class="timeline__marker">
+              <span class="timeline__day">Day 6</span>
+              <div class="timeline__dot timeline__dot--gold"><i data-lucide="trophy"></i></div>
+            </div>
+            <div class="timeline__card timeline__card--last">
+              <span class="timeline__date">Saturday, Mar 28</span>
+              <h3 class="timeline__title">Awards Night & Closing Ceremony</h3>
+              <p class="timeline__desc">A grand closing celebration — recognizing winners across all categories, featuring performances, special guests, and the passing of the torch for CCS Week 2027.</p>
+              <div class="timeline__tags">
+                <span class="tag"><i data-lucide="map-pin"></i> University Events Hall</span>
+                <span class="tag"><i data-lucide="clock"></i> 6:00 PM</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /timeline -->
+      </div>
+    </section>
+
+    <!-- ============================================================
+         REGISTRATION SECTION
+    ============================================================ -->
+    <section class="registration section section--alt" id="register">
+      <div class="container">
+        <div class="section__header reveal">
+          <div class="section__eyebrow">
+            <i data-lucide="pen-line"></i>
+            Registration
+          </div>
+          <h2 class="section__title">Secure Your Spot</h2>
+          <p class="section__subtitle">
+            Registration is free and open to all CCS students. Fill in the form below
+            and we'll confirm your slot via email.
+          </p>
         </div>
 
-        <p class="hero-desc">
-          The premier technology and innovation summit of Southeast Asia. Three days of world-class speakers, cutting-edge workshops, and unmatched networking opportunities.
+        <div class="form-card reveal" id="formCard">
+          <!-- Success State -->
+          <div class="form-success" id="formSuccess" hidden>
+            <div class="form-success__icon">
+              <i data-lucide="circle-check-big"></i>
+            </div>
+            <h3 class="form-success__title">You're Registered!</h3>
+            <p class="form-success__text">
+              Thank you for signing up for CCS Week 2026. A confirmation has been sent to your email.
+              We'll see you at the event!
+            </p>
+            <button class="btn btn--primary" id="resetFormBtn">
+              <i data-lucide="rotate-ccw"></i>
+              Register Another
+            </button>
+          </div>
+
+          <!-- Form -->
+          <form class="reg-form" id="regForm" novalidate>
+            <div class="form-grid">
+
+              <div class="form-group">
+                <label class="form-label" for="fullName">
+                  <i data-lucide="user"></i>
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="fullName"
+                  name="fullName"
+                  class="form-input"
+                  placeholder="e.g. Maria Santos"
+                  autocomplete="name"
+                />
+                <span class="form-error" id="fullNameError" role="alert"></span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="email">
+                  <i data-lucide="mail"></i>
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="form-input"
+                  placeholder="e.g. maria@university.edu"
+                  autocomplete="email"
+                />
+                <span class="form-error" id="emailError" role="alert"></span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="courseYear">
+                  <i data-lucide="graduation-cap"></i>
+                  Course / Year
+                </label>
+                <select id="courseYear" name="courseYear" class="form-input form-select">
+                  <option value="" disabled selected>Select your course and year</option>
+                  <optgroup label="BS Computer Science">
+                    <option value="BSCS-1">BSCS — 1st Year</option>
+                    <option value="BSCS-2">BSCS — 2nd Year</option>
+                    <option value="BSCS-3">BSCS — 3rd Year</option>
+                    <option value="BSCS-4">BSCS — 4th Year</option>
+                  </optgroup>
+                  <optgroup label="BS Information Technology">
+                    <option value="BSIT-1">BSIT — 1st Year</option>
+                    <option value="BSIT-2">BSIT — 2nd Year</option>
+                    <option value="BSIT-3">BSIT — 3rd Year</option>
+                    <option value="BSIT-4">BSIT — 4th Year</option>
+                  </optgroup>
+                  <optgroup label="BS Information Systems">
+                    <option value="BSIS-1">BSIS — 1st Year</option>
+                    <option value="BSIS-2">BSIS — 2nd Year</option>
+                    <option value="BSIS-3">BSIS — 3rd Year</option>
+                    <option value="BSIS-4">BSIS — 4th Year</option>
+                  </optgroup>
+                </select>
+                <span class="form-error" id="courseYearError" role="alert"></span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="eventSelect">
+                  <i data-lucide="list-checks"></i>
+                  Event Selection
+                </label>
+                <select id="eventSelect" name="eventSelect" class="form-input form-select">
+                  <option value="" disabled selected>Choose an event to join</option>
+                  <option value="hackathon">Hackathon 2026</option>
+                  <option value="ai-exhibit">AI Exhibit</option>
+                  <option value="webdev-cup">Web Dev Cup</option>
+                  <option value="design-sprint">Design Sprint</option>
+                  <option value="tech-talk">Tech Talk Series (Attendee)</option>
+                  <option value="awards-night">Awards Night (Attendee)</option>
+                </select>
+                <span class="form-error" id="eventSelectError" role="alert"></span>
+              </div>
+
+            </div><!-- /form-grid -->
+
+            <div class="form-group form-group--full">
+              <label class="form-checkbox">
+                <input type="checkbox" id="agreeTerms" name="agreeTerms" />
+                <span class="form-checkbox__box"><i data-lucide="check"></i></span>
+                <span class="form-checkbox__label">
+                  I agree to the event guidelines and confirm my student enrollment status.
+                </span>
+              </label>
+              <span class="form-error" id="agreeTermsError" role="alert"></span>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn--primary btn--large" id="submitBtn">
+                <i data-lucide="send"></i>
+                Submit Registration
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FINAL CTA SECTION
+    ============================================================ -->
+    <section class="cta section">
+      <div class="cta__bg" aria-hidden="true"></div>
+      <div class="container cta__container reveal">
+        <div class="cta__icon" aria-hidden="true">
+          <i data-lucide="zap"></i>
+        </div>
+        <h2 class="cta__title">Don't Miss Out on CCS Week 2026</h2>
+        <p class="cta__subtitle">
+          Spots are limited. Register today and be part of something extraordinary —
+          built by students, for students.
         </p>
-
-        <div class="hero-actions">
-          <a href="#register" class="btn btn-accent btn-lg">
-            <span>Secure Your Spot</span>
-            <span aria-hidden="true">→</span>
-          </a>
-          <a href="#about" class="btn btn-outline btn-lg">
-            Learn More
-          </a>
-        </div>
-
-        <div class="hero-stat-strip" role="list" aria-label="Event statistics">
-          <div class="hero-stat" role="listitem">
-            <strong>2,400+</strong>
-            <span>Attendees</span>
-          </div>
-          <div class="hero-stat" role="listitem">
-            <strong>80+</strong>
-            <span>Speakers</span>
-          </div>
-          <div class="hero-stat" role="listitem">
-            <strong>24</strong>
-            <span>Workshops</span>
-          </div>
-          <div class="hero-stat" role="listitem">
-            <strong>3</strong>
-            <span>Days</span>
-          </div>
-        </div>
+        <a href="#register" class="btn btn--white btn--large" data-nav>
+          <i data-lucide="arrow-right"></i>
+          Register Now — It's Free
+        </a>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ============================================
-       ABOUT
-  ============================================ -->
-  <section id="about" aria-labelledby="about-heading">
-    <div class="container">
-      <div class="reveal">
-        <span class="section-label">About the Event</span>
-        <h2 class="section-title" id="about-heading">Where Innovation Meets Community</h2>
-        <p class="section-desc">NEXUS 2026 brings together the brightest minds in technology, design, and entrepreneurship for an unforgettable three-day experience.</p>
-      </div>
+  </main>
 
-      <div class="about-layout">
-        <div class="about-text reveal">
-          <p>NEXUS is Southeast Asia's fastest-growing tech summit, uniting developers, designers, entrepreneurs, and thought leaders under one roof. With a focus on actionable insights and real-world applications, NEXUS goes beyond conferences — it's a launchpad.</p>
-          <p>From immersive hands-on workshops to open-space hackathons and evening networking mixers, every moment is crafted to accelerate your growth and spark lasting collaborations.</p>
-          <p>Whether you're a student discovering your path, a seasoned professional leveling up, or a founder building the next big thing — NEXUS 2026 is your stage.</p>
-          <br>
-          <a href="#register" class="btn btn-primary">Join 2,400+ Innovators</a>
-        </div>
-
-        <div class="highlights-grid">
-          <div class="highlight-card reveal reveal-delay-1">
-            <div class="highlight-icon blue" aria-hidden="true">🎤</div>
-            <h4>World-Class Keynotes</h4>
-            <p>80+ speakers from leading tech companies, startups, and research institutions.</p>
-          </div>
-          <div class="highlight-card reveal reveal-delay-2">
-            <div class="highlight-icon teal" aria-hidden="true">🛠️</div>
-            <h4>Hands-On Workshops</h4>
-            <p>24 technical workshops across AI/ML, cloud, cybersecurity, and web dev tracks.</p>
-          </div>
-          <div class="highlight-card reveal reveal-delay-3">
-            <div class="highlight-icon pink" aria-hidden="true">🤝</div>
-            <h4>Networking Events</h4>
-            <p>Curated evening mixers, roundtables, and a dedicated Expo floor.</p>
-          </div>
-          <div class="highlight-card reveal reveal-delay-4">
-            <div class="highlight-icon gold" aria-hidden="true">🏆</div>
-            <h4>Hackathon & Awards</h4>
-            <p>₱500,000 in prizes. Build real products with real teams in 24 hours.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================
-       REGISTRATION FORM
-  ============================================ -->
-  <section id="register" aria-labelledby="register-heading">
-    <div class="container">
-      <div class="reveal" style="text-align:center;">
-        <span class="section-label">Registration</span>
-        <h2 class="section-title" id="register-heading">Claim Your Spot at NEXUS 2026</h2>
-        <p class="section-desc" style="margin:0 auto;">Fill out the form below to complete your registration. Limited seats available.</p>
-      </div>
-
-      <div class="form-wrap" role="main" aria-label="Event Registration Form">
-        <!-- Progress -->
-        <div class="form-progress" aria-label="Form progress">
-          <div class="progress-steps" role="list">
-            <div class="progress-step active" id="step-indicator-1" role="listitem" aria-label="Step 1: Personal Info - current">
-              <div class="step-num" aria-hidden="true">1</div>
-              <span class="step-label">Personal Info</span>
-            </div>
-            <div class="progress-step" id="step-indicator-2" role="listitem" aria-label="Step 2: Event Details">
-              <div class="step-num" aria-hidden="true">2</div>
-              <span class="step-label">Event Details</span>
-            </div>
-            <div class="progress-step" id="step-indicator-3" role="listitem" aria-label="Step 3: Add-Ons">
-              <div class="step-num" aria-hidden="true">3</div>
-              <span class="step-label">Add-Ons</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-body">
-          <!-- Step 1: Personal Info -->
-          <div class="form-panel active" id="panel-1" role="region" aria-labelledby="panel1-title">
-            <h3 class="form-panel-title" id="panel1-title">Tell us about yourself</h3>
-            <p class="form-panel-desc">We'll use this info to personalize your event experience and send your confirmation.</p>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="firstName">First Name <span class="req" aria-label="required">*</span></label>
-                <div class="input-wrap has-icon">
-                  <input type="text" id="firstName" name="firstName" placeholder="Juan" autocomplete="given-name" aria-required="true"/>
-                  <span class="input-icon" aria-hidden="true">👤</span>
-                </div>
-                <div class="field-error" id="err-firstName" role="alert">Please enter your first name.</div>
-              </div>
-              <div class="form-group">
-                <label for="lastName">Last Name <span class="req" aria-label="required">*</span></label>
-                <div class="input-wrap">
-                  <input type="text" id="lastName" name="lastName" placeholder="dela Cruz" autocomplete="family-name" aria-required="true"/>
-                </div>
-                <div class="field-error" id="err-lastName" role="alert">Please enter your last name.</div>
-              </div>
-            </div>
-
-            <div class="form-row single">
-              <div class="form-group">
-                <label for="email">Email Address <span class="req" aria-label="required">*</span></label>
-                <div class="input-wrap has-icon">
-                  <input type="email" id="email" name="email" placeholder="juan@example.com" autocomplete="email" aria-required="true"/>
-                  <span class="input-icon" aria-hidden="true">✉️</span>
-                </div>
-                <div class="field-error" id="err-email" role="alert">Please enter a valid email address.</div>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="phone">Phone Number <span class="req" aria-label="required">*</span></label>
-                <div class="input-wrap has-icon">
-                  <input type="tel" id="phone" name="phone" placeholder="+63 917 123 4567" autocomplete="tel" aria-required="true"/>
-                  <span class="input-icon" aria-hidden="true">📱</span>
-                </div>
-                <div class="field-error" id="err-phone" role="alert">Please enter a valid phone number.</div>
-              </div>
-              <div class="form-group">
-                <label for="org">Organization / School <span class="req" aria-label="required">*</span></label>
-                <div class="input-wrap has-icon">
-                  <input type="text" id="org" name="org" placeholder="DLSU, Ateneo, Google..." autocomplete="organization" aria-required="true"/>
-                  <span class="input-icon" aria-hidden="true">🏢</span>
-                </div>
-                <div class="field-error" id="err-org" role="alert">Please enter your organization or school.</div>
-              </div>
-            </div>
-
-            <div class="form-row single">
-              <div class="form-group">
-                <label for="role">Your Role</label>
-                <div class="input-wrap has-icon">
-                  <select id="role" name="role" aria-label="Select your professional role">
-                    <option value="" disabled selected>Select your role</option>
-                    <option>Student</option>
-                    <option>Developer / Engineer</option>
-                    <option>Designer / UX</option>
-                    <option>Product Manager</option>
-                    <option>Founder / Entrepreneur</option>
-                    <option>Researcher / Academic</option>
-                    <option>Other</option>
-                  </select>
-                  <span class="input-icon" aria-hidden="true">💼</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-nav">
-              <span></span>
-              <button class="btn btn-primary" onclick="nextStep(1)" type="button" aria-label="Continue to Event Details">
-                Continue <span aria-hidden="true">→</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Step 2: Event Details -->
-          <div class="form-panel" id="panel-2" role="region" aria-labelledby="panel2-title">
-            <h3 class="form-panel-title" id="panel2-title">Choose your tracks</h3>
-            <p class="form-panel-desc">Select the workshops and tracks you'd like to attend. You can choose multiple.</p>
-
-            <div class="form-group">
-              <label>Event Tracks <span class="req" aria-label="required">*</span> <span style="font-weight:400;color:var(--c-text-muted)">(select at least one)</span></label>
-              <div class="check-grid" role="group" aria-label="Event tracks selection">
-                <div class="check-item">
-                  <input type="checkbox" id="track-ai" name="tracks" value="AI & Machine Learning" onchange="updateWorkshopInfo()"/>
-                  <label class="check-label" for="track-ai">
-                    <div class="check-box" aria-hidden="true"></div>
-                    <div class="check-text">
-                      <strong>AI & Machine Learning</strong>
-                      <span>LLMs, computer vision, MLOps</span>
-                    </div>
-                  </label>
-                </div>
-                <div class="check-item">
-                  <input type="checkbox" id="track-web" name="tracks" value="Web & Mobile Dev" onchange="updateWorkshopInfo()"/>
-                  <label class="check-label" for="track-web">
-                    <div class="check-box" aria-hidden="true"></div>
-                    <div class="check-text">
-                      <strong>Web & Mobile Dev</strong>
-                      <span>React, Flutter, full-stack</span>
-                    </div>
-                  </label>
-                </div>
-                <div class="check-item">
-                  <input type="checkbox" id="track-cloud" name="tracks" value="Cloud & DevOps" onchange="updateWorkshopInfo()"/>
-                  <label class="check-label" for="track-cloud">
-                    <div class="check-box" aria-hidden="true"></div>
-                    <div class="check-text">
-                      <strong>Cloud & DevOps</strong>
-                      <span>AWS, Kubernetes, CI/CD</span>
-                    </div>
-                  </label>
-                </div>
-                <div class="check-item">
-                  <input type="checkbox" id="track-security" name="tracks" value="Cybersecurity" onchange="updateWorkshopInfo()"/>
-                  <label class="check-label" for="track-security">
-                    <div class="check-box" aria-hidden="true"></div>
-                    <div class="check-text">
-                      <strong>Cybersecurity</strong>
-                      <span>Pentesting, threat intel, zero-trust</span>
-                    </div>
-                  </label>
-                </div>
-                <div class="check-item">
-                  <input type="checkbox" id="track-design" name="tracks" value="UX & Product Design" onchange="updateWorkshopInfo()"/>
-                  <label class="check-label" for="track-design">
-                    <div class="check-box" aria-hidden="true"></div>
-                    <div class="check-text">
-                      <strong>UX & Product Design</strong>
-                      <span>Design systems, research, Figma</span>
-                    </div>
-                  </label>
-                </div>
-                <div class="check-item">
-                  <input type="checkbox" id="track-startup" name="tracks" value="Startup & Entrepreneurship" onchange="updateWorkshopInfo()"/>
-                  <label class="check-label" for="track-startup">
-                    <div class="check-box" aria-hidden="true"></div>
-                    <div class="check-text">
-                      <strong>Startup & Entrepreneurship</strong>
-                      <span>Fundraising, growth, GTM strategy</span>
-                    </div>
-                  </label>
-                </div>
-              </div>
-              <div class="field-error" id="err-tracks" role="alert">Please select at least one track.</div>
-
-              <div class="workshop-info" id="workshop-info" role="status" aria-live="polite"></div>
-            </div>
-
-            <div class="form-row single">
-              <div class="form-group">
-                <label for="dietaryNeeds">Dietary Requirements</label>
-                <div class="input-wrap has-icon">
-                  <select id="dietaryNeeds" name="dietary" aria-label="Select dietary requirements">
-                    <option value="">No restrictions</option>
-                    <option>Vegetarian</option>
-                    <option>Vegan</option>
-                    <option>Halal</option>
-                    <option>Gluten-free</option>
-                    <option>Allergies (specify in notes)</option>
-                  </select>
-                  <span class="input-icon" aria-hidden="true">🍽️</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-row single">
-              <div class="form-group">
-                <label for="notes">Special Notes or Accessibility Needs</label>
-                <textarea id="notes" name="notes" placeholder="Let us know if you have any accessibility requirements or special requests..." rows="3" aria-label="Special notes or accessibility needs"></textarea>
-              </div>
-            </div>
-
-            <div class="form-nav">
-              <button class="btn btn-outline" onclick="prevStep(2)" type="button" aria-label="Go back to Personal Info">← Back</button>
-              <button class="btn btn-primary" onclick="nextStep(2)" type="button" aria-label="Continue to Add-Ons">Continue →</button>
-            </div>
-          </div>
-
-          <!-- Step 3: Add-Ons -->
-          <div class="form-panel" id="panel-3" role="region" aria-labelledby="panel3-title">
-            <h3 class="form-panel-title" id="panel3-title">Almost there!</h3>
-            <p class="form-panel-desc">Complete your registration with optional add-ons. Your shirt is included with registration.</p>
-
-            <div class="form-group">
-              <label>T-Shirt Size <span class="req" aria-label="required">*</span></label>
-              <div class="size-grid" role="radiogroup" aria-label="Select T-shirt size">
-                <div class="size-item" role="presentation">
-                  <input type="radio" name="tshirt" id="size-xs" value="XS"/>
-                  <label class="size-label" for="size-xs">XS</label>
-                </div>
-                <div class="size-item" role="presentation">
-                  <input type="radio" name="tshirt" id="size-s" value="S"/>
-                  <label class="size-label" for="size-s">S</label>
-                </div>
-                <div class="size-item" role="presentation">
-                  <input type="radio" name="tshirt" id="size-m" value="M"/>
-                  <label class="size-label" for="size-m">M</label>
-                </div>
-                <div class="size-item" role="presentation">
-                  <input type="radio" name="tshirt" id="size-l" value="L" checked/>
-                  <label class="size-label" for="size-l">L</label>
-                </div>
-                <div class="size-item" role="presentation">
-                  <input type="radio" name="tshirt" id="size-xl" value="XL"/>
-                  <label class="size-label" for="size-xl">XL</label>
-                </div>
-                <div class="size-item" role="presentation">
-                  <input type="radio" name="tshirt" id="size-xxl" value="XXL"/>
-                  <label class="size-label" for="size-xxl">2XL</label>
-                </div>
-              </div>
-              <div class="field-error" id="err-tshirt" role="alert">Please select a T-shirt size.</div>
-            </div>
-
-            <div class="form-group" style="margin-top:20px;">
-              <label>Optional Add-Ons</label>
-              <div class="check-grid" style="grid-template-columns:1fr;" role="group" aria-label="Optional add-ons">
-                <div class="check-item">
-                  <input type="checkbox" id="addon-hackathon" name="addons" value="Hackathon"/>
-                  <label class="check-label" for="addon-hackathon">
-                    <div class="check-box" aria-hidden="true"></div>
-                    <div class="check-text">
-                      <strong>🏆 Join the NEXUS Hackathon — Free</strong>
-                      <span>48-hour build challenge. Teams of 2–5. ₱500K in prizes.</span>
-                    </div>
-                  </label>
-                </div>
-                <div class="check-item">
-                  <input type="checkbox" id="addon-vip" name="addons" value="VIP Dinner"/>
-                  <label class="check-label" for="addon-vip">
-                    <div class="check-box" aria-hidden="true"></div>
-                    <div class="check-text">
-                      <strong>✨ VIP Speaker Dinner — ₱1,500</strong>
-                      <span>Exclusive dinner with 8 keynote speakers on Day 1 evening.</span>
-                    </div>
-                  </label>
-                </div>
-                <div class="check-item">
-                  <input type="checkbox" id="addon-cert" name="addons" value="Certificate Bundle"/>
-                  <label class="check-label" for="addon-cert">
-                    <div class="check-box" aria-hidden="true"></div>
-                    <div class="check-text">
-                      <strong>📜 Digital Certificate Bundle — ₱500</strong>
-                      <span>Verified completion certificates for all workshops attended.</span>
-                    </div>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-row single" style="margin-top:4px;">
-              <div class="form-group">
-                <label for="heardFrom">How did you hear about NEXUS?</label>
-                <div class="input-wrap has-icon">
-                  <select id="heardFrom" name="heardFrom" aria-label="How you heard about NEXUS">
-                    <option value="" disabled selected>Select an option</option>
-                    <option>Social Media</option>
-                    <option>Friend / Colleague</option>
-                    <option>Email Newsletter</option>
-                    <option>University / Organization</option>
-                    <option>Search Engine</option>
-                    <option>Previous NEXUS Event</option>
-                  </select>
-                  <span class="input-icon" aria-hidden="true">📢</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-nav">
-              <button class="btn btn-outline" onclick="prevStep(3)" type="button" aria-label="Go back to Event Details">← Back</button>
-              <button class="btn btn-accent btn-lg" onclick="submitForm()" type="button" id="submitBtn" aria-label="Complete Registration">
-                Complete Registration ✓
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================
-       CONFIRMATION
-  ============================================ -->
-  <section id="confirmation" aria-labelledby="confirm-heading" aria-live="polite">
-    <div class="container" style="text-align:center;">
-      <div class="confirm-icon" aria-hidden="true">🎉</div>
-      <h2 class="confirm-title" id="confirm-heading">You're in, <span id="confirm-name">Attendee</span>!</h2>
-      <p class="confirm-desc">Your registration for NEXUS 2026 is confirmed. Check your inbox for a confirmation email with your QR ticket.</p>
-
-      <div class="confirm-card" role="region" aria-label="Registration summary">
-        <div class="confirm-detail">
-          <span class="confirm-detail-label">Event</span>
-          <span class="confirm-detail-value">NEXUS 2026</span>
-        </div>
-        <div class="confirm-detail">
-          <span class="confirm-detail-label">Dates</span>
-          <span class="confirm-detail-value">April 18–20, 2026</span>
-        </div>
-        <div class="confirm-detail">
-          <span class="confirm-detail-label">Venue</span>
-          <span class="confirm-detail-value">BGC Convention Center, Taguig</span>
-        </div>
-        <div class="confirm-detail">
-          <span class="confirm-detail-label">Tracks</span>
-          <span class="confirm-detail-value" id="confirm-tracks">—</span>
-        </div>
-        <div class="confirm-detail">
-          <span class="confirm-detail-label">Email</span>
-          <span class="confirm-detail-value" id="confirm-email">—</span>
-        </div>
-      </div>
-
-      <div class="share-section">
-        <p>Share that you're attending NEXUS 2026 🚀</p>
-        <div class="share-buttons" role="list">
-          <button class="share-btn" onclick="shareEvent('twitter')" type="button" role="listitem">
-            <span aria-hidden="true">🐦</span> Twitter / X
-          </button>
-          <button class="share-btn" onclick="shareEvent('linkedin')" type="button" role="listitem">
-            <span aria-hidden="true">💼</span> LinkedIn
-          </button>
-          <button class="share-btn" onclick="shareEvent('copy')" type="button" id="copyLinkBtn" role="listitem">
-            <span aria-hidden="true">🔗</span> Copy Link
-          </button>
-        </div>
-      </div>
-
-      <div style="margin-top:40px;">
-        <button class="btn btn-outline" onclick="resetForm()" type="button">Register Another Person</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================
-       SCHEDULE
-  ============================================ -->
-  <section id="schedule" aria-labelledby="schedule-heading">
-    <div class="container">
-      <div class="reveal">
-        <span class="section-label">Event Schedule</span>
-        <h2 class="section-title" id="schedule-heading">Three Days of Inspiration</h2>
-        <p class="section-desc">A packed agenda designed to maximize your learning and networking from morning to night.</p>
-      </div>
-
-      <div style="margin-top:48px;" class="reveal">
-        <div class="day-tabs" role="tablist" aria-label="Event day selection">
-          <button class="day-tab active" onclick="switchDay(this, 'day1')" role="tab" aria-selected="true" aria-controls="day1">📅 Day 1 — Apr 18</button>
-          <button class="day-tab" onclick="switchDay(this, 'day2')" role="tab" aria-selected="false" aria-controls="day2">📅 Day 2 — Apr 19</button>
-          <button class="day-tab" onclick="switchDay(this, 'day3')" role="tab" aria-selected="false" aria-controls="day3">📅 Day 3 — Apr 20</button>
-        </div>
-
-        <!-- Day 1 -->
-        <div class="day-schedule active" id="day1" role="tabpanel" aria-label="Day 1 Schedule">
-          <div class="timeline">
-            <div class="timeline-item">
-              <div class="timeline-dot type-social" aria-hidden="true">🎪</div>
-              <div class="timeline-time">8:00 AM</div>
-              <div class="timeline-content">
-                <h4>Registration & Welcome Coffee</h4>
-                <p>Arrive, collect your badge kit, and connect with fellow attendees over coffee.</p>
-                <span class="timeline-tag tag-social">Social</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot type-keynote" aria-hidden="true">🎤</div>
-              <div class="timeline-time">9:30 AM</div>
-              <div class="timeline-content">
-                <h4>Opening Keynote: The Next Wave of Intelligent Systems</h4>
-                <p>Visionary talk by our headline speaker exploring AI's transformative impact on Southeast Asia.</p>
-                <span class="timeline-tag tag-keynote">Keynote</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot type-workshop" aria-hidden="true">🛠</div>
-              <div class="timeline-time">11:00 AM</div>
-              <div class="timeline-content">
-                <h4>Workshop Block 1 — All Tracks</h4>
-                <p>Parallel workshops across AI/ML, Web Dev, Cloud, Security, Design, and Startup tracks.</p>
-                <span class="timeline-tag tag-workshop">Workshop</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot type-lunch" aria-hidden="true">🍽</div>
-              <div class="timeline-time">1:00 PM</div>
-              <div class="timeline-content">
-                <h4>Networking Lunch & Expo Floor Opens</h4>
-                <p>Visit sponsor booths, demo stations, and enjoy a catered lunch with your new connections.</p>
-                <span class="timeline-tag tag-lunch">Lunch</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot type-keynote" aria-hidden="true">🎤</div>
-              <div class="timeline-time">2:30 PM</div>
-              <div class="timeline-content">
-                <h4>Panel: Building for Billions in Emerging Markets</h4>
-                <p>Founders from 5 SEA unicorns discuss what it takes to scale technology products regionally.</p>
-                <span class="timeline-tag tag-keynote">Keynote</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot type-social" aria-hidden="true">🎪</div>
-              <div class="timeline-time">7:00 PM</div>
-              <div class="timeline-content">
-                <h4>VIP Speaker Dinner (Ticketed)</h4>
-                <p>Exclusive evening with keynote speakers. Meet, ask, and collaborate over dinner.</p>
-                <span class="timeline-tag tag-social">Social</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Day 2 -->
-        <div class="day-schedule" id="day2" role="tabpanel" aria-label="Day 2 Schedule">
-          <div class="timeline">
-            <div class="timeline-item">
-              <div class="timeline-dot type-keynote" aria-hidden="true">🎤</div>
-              <div class="timeline-time">9:00 AM</div>
-              <div class="timeline-content">
-                <h4>Keynote: Open-Source AI — Democratizing Intelligence</h4>
-                <p>How community-driven development is reshaping who controls the future of AI.</p>
-                <span class="timeline-tag tag-keynote">Keynote</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot type-workshop" aria-hidden="true">🛠</div>
-              <div class="timeline-time">10:30 AM</div>
-              <div class="timeline-content">
-                <h4>Workshop Block 2 — Deep Dives</h4>
-                <p>Advanced 3-hour technical workshops with live coding and real-world projects.</p>
-                <span class="timeline-tag tag-workshop">Workshop</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot type-lunch" aria-hidden="true">🍽</div>
-              <div class="timeline-time">1:30 PM</div>
-              <div class="timeline-content">
-                <h4>Lunch + Mentor Roundtables</h4>
-                <p>Sit with a mentor from your track. 20-person intimate roundtable sessions.</p>
-                <span class="timeline-tag tag-lunch">Lunch</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot type-workshop" aria-hidden="true">🏁</div>
-              <div class="timeline-time">3:00 PM</div>
-              <div class="timeline-content">
-                <h4>NEXUS Hackathon Kickoff</h4>
-                <p>Teams form, problem statements released. 24 hours to build and present.</p>
-                <span class="timeline-tag tag-workshop">Hackathon</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Day 3 -->
-        <div class="day-schedule" id="day3" role="tabpanel" aria-label="Day 3 Schedule">
-          <div class="timeline">
-            <div class="timeline-item">
-              <div class="timeline-dot type-workshop" aria-hidden="true">🏁</div>
-              <div class="timeline-time">10:00 AM</div>
-              <div class="timeline-content">
-                <h4>Hackathon Project Submissions</h4>
-                <p>All teams submit final builds. Judges begin evaluation rounds.</p>
-                <span class="timeline-tag tag-workshop">Hackathon</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot type-keynote" aria-hidden="true">🎤</div>
-              <div class="timeline-time">11:30 AM</div>
-              <div class="timeline-content">
-                <h4>Closing Keynote: Building the Future We Want</h4>
-                <p>An inspiring send-off on responsible tech leadership and community-first thinking.</p>
-                <span class="timeline-tag tag-keynote">Keynote</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot type-social" aria-hidden="true">🏆</div>
-              <div class="timeline-time">3:00 PM</div>
-              <div class="timeline-content">
-                <h4>Hackathon Finals & Awards Ceremony</h4>
-                <p>Top 5 teams present to the audience. Winners announced. ₱500,000 in prizes distributed.</p>
-                <span class="timeline-tag tag-social">Awards</span>
-              </div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot type-social" aria-hidden="true">🎪</div>
-              <div class="timeline-time">5:00 PM</div>
-              <div class="timeline-content">
-                <h4>Farewell Mixer & Closing Party</h4>
-                <p>Celebrate three incredible days. Exchange contacts and see you at NEXUS 2027!</p>
-                <span class="timeline-tag tag-social">Social</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================
-       FAQ
-  ============================================ -->
-  <section id="faq" aria-labelledby="faq-heading">
-    <div class="container">
-      <div class="reveal" style="text-align:center;">
-        <span class="section-label">FAQ</span>
-        <h2 class="section-title" id="faq-heading">Frequently Asked Questions</h2>
-        <p class="section-desc" style="margin:0 auto;">Got questions? We've got answers. If you can't find what you're looking for, reach out to our team.</p>
-      </div>
-
-      <div class="faq-grid reveal" style="margin-top:56px;">
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)" role="button" aria-expanded="false" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
-            <span>Is registration free?</span>
-            <div class="faq-icon" aria-hidden="true">+</div>
-          </div>
-          <div class="faq-a" role="region">
-            <div class="faq-a-inner">Yes! General registration for NEXUS 2026 is completely free. You get access to all keynotes, workshops, the expo floor, and networking events. Add-ons like the VIP Dinner and Certificate Bundle are optional paid upgrades.</div>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)" role="button" aria-expanded="false" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
-            <span>Can I change my workshop selection later?</span>
-            <div class="faq-icon" aria-hidden="true">+</div>
-          </div>
-          <div class="faq-a" role="region">
-            <div class="faq-a-inner">Yes. You can update your track preferences up to 7 days before the event via your confirmation email link. After that, changes are subject to availability at the registration desk.</div>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)" role="button" aria-expanded="false" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
-            <span>Is the event in-person only?</span>
-            <div class="faq-icon" aria-hidden="true">+</div>
-          </div>
-          <div class="faq-a" role="region">
-            <div class="faq-a-inner">NEXUS 2026 is primarily an in-person event at the BGC Convention Center. Selected keynote sessions will be livestreamed. Workshop seats are limited to registered in-person attendees only.</div>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)" role="button" aria-expanded="false" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
-            <span>How do I join the Hackathon?</span>
-            <div class="faq-icon" aria-hidden="true">+</div>
-          </div>
-          <div class="faq-a" role="region">
-            <div class="faq-a-inner">Check the "Join the NEXUS Hackathon" add-on during registration. You can join solo and be matched with a team, or register with a pre-formed team of up to 5 members using a shared team code.</div>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)" role="button" aria-expanded="false" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
-            <span>What should I bring?</span>
-            <div class="faq-icon" aria-hidden="true">+</div>
-          </div>
-          <div class="faq-a" role="region">
-            <div class="faq-a-inner">Bring a valid government ID for check-in, your confirmation QR code, your laptop, and chargers. We recommend bringing business cards or a QR code for easy contact sharing. Meals and snacks are provided for registered attendees.</div>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)" role="button" aria-expanded="false" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
-            <span>Is there a refund or transfer policy?</span>
-            <div class="faq-icon" aria-hidden="true">+</div>
-          </div>
-          <div class="faq-a" role="region">
-            <div class="faq-a-inner">General registration is free, so no refunds are necessary. For paid add-ons, refunds are available up to 14 days before the event. You may also transfer your registration to another person anytime before April 10, 2026.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="support-box reveal" style="margin-top:0">
-        <div class="support-icon" aria-hidden="true">💬</div>
-        <div class="support-text">
-          <h3>Still have questions?</h3>
-          <p>Our team is here to help Monday through Friday, 9AM–6PM PHT. Average response time: 2 hours.</p>
-          <div class="support-contacts">
-            <a href="mailto:support@nexus2026.ph" class="support-contact" aria-label="Email support">
-              <span aria-hidden="true">✉️</span> support@nexus2026.ph
-            </a>
-            <a href="tel:+639171234567" class="support-contact" aria-label="Call support">
-              <span aria-hidden="true">📞</span> +63 917 123 4567
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================
+  <!-- ============================================================
        FOOTER
-  ============================================ -->
-  <footer role="contentinfo">
-    <div class="container">
-      <div class="footer-top">
-        <div class="footer-brand">
-          <div class="nav-logo">
-            <div class="nav-logo-mark" aria-hidden="true">NX</div>
-            NEXUS 2026
-          </div>
-          <p>Southeast Asia's premier technology and innovation summit. April 18–20, 2026 in BGC, Taguig City, Philippines.</p>
-        </div>
+  ============================================================ -->
+  <footer class="footer">
+    <div class="container footer__container">
 
-        <div class="footer-links-group">
-          <h5>Event</h5>
-          <a href="#about">About</a>
-          <a href="#schedule">Schedule</a>
-          <a href="#register">Register</a>
-          <a href="#faq">FAQ</a>
-        </div>
-
-        <div class="footer-links-group">
-          <h5>Community</h5>
-          <a href="#">Speakers</a>
-          <a href="#">Sponsors</a>
-          <a href="#">Volunteers</a>
-          <a href="#">Past Events</a>
-        </div>
-
-        <div class="footer-links-group">
-          <h5>Legal</h5>
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Use</a>
-          <a href="#">Code of Conduct</a>
-          <a href="#">Accessibility</a>
+      <div class="footer__brand">
+        <a href="#home" class="footer__logo" data-nav>
+          <span class="navbar__logo-mark">CCS</span>
+          <span class="navbar__logo-text">Week <em>2026</em></span>
+        </a>
+        <p class="footer__tagline">Empowering Future Innovators — March 23–28, 2026</p>
+        <div class="footer__socials">
+          <a href="#" class="footer__social" aria-label="Facebook">
+            <i data-lucide="facebook"></i>
+          </a>
+          <a href="#" class="footer__social" aria-label="Twitter / X">
+            <i data-lucide="twitter"></i>
+          </a>
+          <a href="#" class="footer__social" aria-label="Instagram">
+            <i data-lucide="instagram"></i>
+          </a>
+          <a href="#" class="footer__social" aria-label="LinkedIn">
+            <i data-lucide="linkedin"></i>
+          </a>
         </div>
       </div>
 
-      <div class="footer-bottom">
-        <span>© 2026 NEXUS Summit. All rights reserved.</span>
-        <span>Made with ❤️ in the Philippines 🇵🇭</span>
+      <div class="footer__links-group">
+        <h4 class="footer__group-title">Quick Links</h4>
+        <ul class="footer__links">
+          <li><a href="#home"          data-nav>Home</a></li>
+          <li><a href="#about"         data-nav>About</a></li>
+          <li><a href="#documentation" data-nav>Documentation</a></li>
+          <li><a href="#schedule"      data-nav>Schedule</a></li>
+          <li><a href="#register"      data-nav>Register</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__links-group">
+        <h4 class="footer__group-title">Events</h4>
+        <ul class="footer__links">
+          <li><a href="#schedule">Hackathon 2026</a></li>
+          <li><a href="#schedule">AI Exhibit</a></li>
+          <li><a href="#schedule">Design Sprint</a></li>
+          <li><a href="#schedule">Web Dev Cup</a></li>
+          <li><a href="#schedule">Awards Night</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__links-group">
+        <h4 class="footer__group-title">Contact</h4>
+        <ul class="footer__contact">
+          <li>
+            <i data-lucide="map-pin"></i>
+            <span>College of Computer Studies<br>University Campus, Building C</span>
+          </li>
+          <li>
+            <i data-lucide="mail"></i>
+            <a href="mailto:ccsweek@university.edu">ccsweek@university.edu</a>
+          </li>
+          <li>
+            <i data-lucide="phone"></i>
+            <a href="tel:+63(2)1234567">(02) 123-4567 local 890</a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer__bottom">
+      <div class="container footer__bottom-inner">
+        <p>&copy; 2026 CCS Week. College of Computer Studies. All rights reserved.</p>
+        <p>Designed &amp; Developed by the CCS Development Team</p>
       </div>
     </div>
   </footer>
 
-  <!-- ============================================
-       ANNOUNCEMENT MODAL
-  ============================================ -->
-  <div class="modal-overlay" id="announcementModal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc">
-    <div class="modal">
-      <div class="modal-header">
-        <div>
-          <div style="font-size:2rem;margin-bottom:8px;" aria-hidden="true">🚀</div>
-          <h3 id="modal-title">Early Bird Seats — 87 Left!</h3>
-        </div>
-        <button class="modal-close" onclick="closeModal()" type="button" aria-label="Close announcement">×</button>
-      </div>
-      <p id="modal-desc">Claim your Early Bird spot now and get priority workshop selection before the general queue opens on March 31, 2026. Registration is free — don't miss out!</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;">
-        <a href="#register" class="btn btn-accent" onclick="closeModal()">Register Now — Free</a>
-        <button class="btn btn-outline" onclick="closeModal()" type="button">Maybe Later</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============================================
-       JAVASCRIPT
-  ============================================ -->
-  <script>
-    /* ============================================
-       NAVIGATION
-    ============================================ */
-
-    // Sticky nav on scroll
-    const nav = document.getElementById('nav');
-    window.addEventListener('scroll', () => {
-      nav.classList.toggle('scrolled', window.scrollY > 20);
-    }, { passive: true });
-
-    // Burger menu
-    const burgerBtn  = document.getElementById('burgerBtn');
-    const mobileNav  = document.getElementById('mobileNav');
-
-    burgerBtn.addEventListener('click', () => {
-      const isOpen = mobileNav.classList.toggle('open');
-      burgerBtn.classList.toggle('open', isOpen);
-      burgerBtn.setAttribute('aria-expanded', isOpen);
-    });
-
-    function closeMobileNav() {
-      mobileNav.classList.remove('open');
-      burgerBtn.classList.remove('open');
-      burgerBtn.setAttribute('aria-expanded', 'false');
-    }
-
-    /* ============================================
-       THEME TOGGLE
-    ============================================ */
-
-    const themeToggle = document.getElementById('themeToggle');
-    const html        = document.documentElement;
-
-    // Persist theme
-    const savedTheme = localStorage.getItem('nexus-theme') || 'dark';
-    html.setAttribute('data-theme', savedTheme);
-    themeToggle.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
-
-    themeToggle.addEventListener('click', () => {
-      const current = html.getAttribute('data-theme');
-      const next    = current === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      themeToggle.textContent = next === 'dark' ? '🌙' : '☀️';
-      localStorage.setItem('nexus-theme', next);
-    });
-
-    /* ============================================
-       SCROLL REVEAL
-    ============================================ */
-
-    const revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in-view');
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-    /* ============================================
-       MULTI-STEP FORM
-    ============================================ */
-
-    let currentStep = 1;
-    const TOTAL_STEPS = 3;
-
-    /**
-     * Navigate to the next step after validating current.
-     * @param {number} step - current step index
-     */
-    function nextStep(step) {
-      if (!validateStep(step)) return;
-
-      // Mark current as completed, activate next
-      document.getElementById(`step-indicator-${step}`).classList.remove('active');
-      document.getElementById(`step-indicator-${step}`).classList.add('completed');
-      document.getElementById(`step-indicator-${step + 1}`).classList.add('active');
-
-      document.getElementById(`panel-${step}`).classList.remove('active');
-      document.getElementById(`panel-${step + 1}`).classList.add('active');
-
-      currentStep = step + 1;
-
-      // Scroll to form top
-      document.getElementById('register').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    /**
-     * Navigate back to the previous step.
-     * @param {number} step - current step index
-     */
-    function prevStep(step) {
-      document.getElementById(`step-indicator-${step}`).classList.remove('active');
-      document.getElementById(`step-indicator-${step - 1}`).classList.remove('completed');
-      document.getElementById(`step-indicator-${step - 1}`).classList.add('active');
-
-      document.getElementById(`panel-${step}`).classList.remove('active');
-      document.getElementById(`panel-${step - 1}`).classList.add('active');
-
-      currentStep = step - 1;
-      document.getElementById('register').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    /* ============================================
-       FORM VALIDATION
-    ============================================ */
-
-    /**
-     * Show or hide a field error.
-     * @param {string} fieldId
-     * @param {boolean} show
-     */
-    function setError(fieldId, show) {
-      const field = document.getElementById(fieldId);
-      const errEl = document.getElementById(`err-${fieldId}`);
-      if (!field) return;
-
-      if (show) {
-        field.classList.add('invalid');
-        if (errEl) errEl.classList.add('show');
-      } else {
-        field.classList.remove('invalid');
-        if (errEl) errEl.classList.remove('show');
-      }
-    }
-
-    /**
-     * Validate a specific step. Returns true if valid.
-     * @param {number} step
-     */
-    function validateStep(step) {
-      let valid = true;
-
-      if (step === 1) {
-        // First name
-        const firstName = document.getElementById('firstName').value.trim();
-        setError('firstName', firstName.length < 2);
-        if (firstName.length < 2) valid = false;
-
-        // Last name
-        const lastName = document.getElementById('lastName').value.trim();
-        setError('lastName', lastName.length < 2);
-        if (lastName.length < 2) valid = false;
-
-        // Email
-        const email = document.getElementById('email').value.trim();
-        const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        setError('email', !emailRx.test(email));
-        if (!emailRx.test(email)) valid = false;
-
-        // Phone
-        const phone = document.getElementById('phone').value.trim();
-        const phoneRx = /^[+\d\s\-()]{7,20}$/;
-        setError('phone', !phoneRx.test(phone));
-        if (!phoneRx.test(phone)) valid = false;
-
-        // Org
-        const org = document.getElementById('org').value.trim();
-        setError('org', org.length < 2);
-        if (org.length < 2) valid = false;
-      }
-
-      if (step === 2) {
-        // Tracks
-        const trackChecked = document.querySelectorAll('input[name="tracks"]:checked').length > 0;
-        const errTracks = document.getElementById('err-tracks');
-        if (!trackChecked) {
-          errTracks.classList.add('show');
-          valid = false;
-        } else {
-          errTracks.classList.remove('show');
-        }
-      }
-
-      return valid;
-    }
-
-    // Real-time validation on blur
-    ['firstName','lastName','email','phone','org'].forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.addEventListener('blur', () => {
-        if (id === 'email') {
-          const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          setError('email', el.value.trim() && !emailRx.test(el.value.trim()));
-        } else if (id === 'phone') {
-          const phoneRx = /^[+\d\s\-()]{7,20}$/;
-          setError('phone', el.value.trim() && !phoneRx.test(el.value.trim()));
-        } else {
-          setError(id, el.value.trim().length > 0 && el.value.trim().length < 2);
-        }
-      });
-      el.addEventListener('input', () => {
-        if (el.classList.contains('invalid') && el.value.trim().length >= 2) {
-          setError(id, false);
-        }
-      });
-    });
-
-    /* ============================================
-       WORKSHOP INFO DYNAMIC UPDATE
-    ============================================ */
-
-    const workshopDetails = {
-      'track-ai':       '🤖 AI & ML — 5 workshops: Prompt Engineering, Fine-tuning LLMs, MLOps Pipelines, Computer Vision, AI Ethics.',
-      'track-web':      '🌐 Web & Mobile — 4 workshops: React 19 Deep Dive, Flutter 4, REST vs GraphQL, Full-Stack with Next.js.',
-      'track-cloud':    '☁️ Cloud & DevOps — 4 workshops: Kubernetes at Scale, AWS Architecture, GitHub Actions CI/CD, Terraform IaC.',
-      'track-security': '🔒 Cybersecurity — 4 workshops: Ethical Hacking Bootcamp, Zero-Trust Architecture, Threat Modeling, OWASP Top 10.',
-      'track-design':   '🎨 UX & Design — 3 workshops: Design Systems with Figma, User Research Methods, Accessibility-First Design.',
-      'track-startup':  '🚀 Startup — 4 workshops: Fundraising Masterclass, GTM Strategy, Product-Market Fit, Pitch Practice.',
-    };
-
-    function updateWorkshopInfo() {
-      const checked = document.querySelectorAll('input[name="tracks"]:checked');
-      const infoBox = document.getElementById('workshop-info');
-
-      if (checked.length === 0) {
-        infoBox.classList.remove('show');
-        return;
-      }
-
-      let html = `<strong style="color:var(--c-text);display:block;margin-bottom:8px;">Your selected tracks (${checked.length}):</strong>`;
-      checked.forEach(cb => {
-        if (workshopDetails[cb.id]) {
-          html += `<div style="margin-bottom:6px;">${workshopDetails[cb.id]}</div>`;
-        }
-      });
-
-      infoBox.innerHTML = html;
-      infoBox.classList.add('show');
-
-      // Clear track error if checked
-      document.getElementById('err-tracks').classList.remove('show');
-    }
-
-    /* ============================================
-       FORM SUBMISSION
-    ============================================ */
-
-    function submitForm() {
-      if (!validateStep(3)) return;
-
-      // Check T-shirt
-      const tshirtSelected = document.querySelector('input[name="tshirt"]:checked');
-      if (!tshirtSelected) {
-        document.getElementById('err-tshirt').classList.add('show');
-        return;
-      }
-      document.getElementById('err-tshirt').classList.remove('show');
-
-      // Gather data
-      const firstName = document.getElementById('firstName').value.trim();
-      const lastName  = document.getElementById('lastName').value.trim();
-      const email     = document.getElementById('email').value.trim();
-      const tracks    = Array.from(document.querySelectorAll('input[name="tracks"]:checked')).map(c => c.value);
-
-      // Animate submit button
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.textContent = 'Submitting...';
-      submitBtn.disabled = true;
-
-      // Simulate async submission
-      setTimeout(() => {
-        // Show confirmation
-        document.getElementById('register').style.display = 'none';
-        const confirmSection = document.getElementById('confirmation');
-        confirmSection.classList.add('show');
-        confirmSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        // Populate confirmation details
-        document.getElementById('confirm-name').textContent = firstName;
-        document.getElementById('confirm-email').textContent = email;
-        document.getElementById('confirm-tracks').textContent =
-          tracks.length > 0 ? tracks.join(', ') : 'General Admission';
-
-        submitBtn.textContent = 'Complete Registration ✓';
-        submitBtn.disabled = false;
-      }, 1600);
-    }
-
-    /**
-     * Reset the form and restore register section.
-     */
-    function resetForm() {
-      document.getElementById('register').style.display = '';
-      document.getElementById('confirmation').classList.remove('show');
-
-      // Reset all inputs
-      document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach(el => el.value = '');
-      document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
-      document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
-      document.querySelector('input[name="tshirt"][value="L"]').checked = true;
-
-      // Reset to step 1
-      document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
-      document.getElementById('panel-1').classList.add('active');
-      document.querySelectorAll('.progress-step').forEach(s => {
-        s.classList.remove('active','completed');
-      });
-      document.getElementById('step-indicator-1').classList.add('active');
-
-      updateWorkshopInfo();
-      document.getElementById('register').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    /* ============================================
-       FAQ ACCORDION
-    ============================================ */
-
-    function toggleFaq(btn) {
-      const item = btn.closest('.faq-item');
-      const isOpen = item.classList.contains('open');
-
-      // Close all
-      document.querySelectorAll('.faq-item').forEach(f => {
-        f.classList.remove('open');
-        f.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
-      });
-
-      // Toggle clicked
-      if (!isOpen) {
-        item.classList.add('open');
-        btn.setAttribute('aria-expanded', 'true');
-      }
-    }
-
-    /* ============================================
-       SCHEDULE TABS
-    ============================================ */
-
-    function switchDay(btn, dayId) {
-      document.querySelectorAll('.day-tab').forEach(t => {
-        t.classList.remove('active');
-        t.setAttribute('aria-selected', 'false');
-      });
-      document.querySelectorAll('.day-schedule').forEach(d => d.classList.remove('active'));
-
-      btn.classList.add('active');
-      btn.setAttribute('aria-selected', 'true');
-      document.getElementById(dayId).classList.add('active');
-    }
-
-    /* ============================================
-       SHARE BUTTONS
-    ============================================ */
-
-    function shareEvent(platform) {
-      const url   = encodeURIComponent('https://nexus2026.ph');
-      const text  = encodeURIComponent("I just registered for NEXUS 2026 — the biggest tech summit in SEA! 🚀 April 18-20, BGC, Taguig. See you there! #NEXUS2026");
-
-      const urls = {
-        twitter:  `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
-        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
-      };
-
-      if (platform === 'copy') {
-        navigator.clipboard.writeText('https://nexus2026.ph').then(() => {
-          const btn = document.getElementById('copyLinkBtn');
-          btn.innerHTML = '<span>✅</span> Copied!';
-          setTimeout(() => { btn.innerHTML = '<span>🔗</span> Copy Link'; }, 2000);
-        }).catch(() => {
-          alert('Link: https://nexus2026.ph');
-        });
-        return;
-      }
-
-      window.open(urls[platform], '_blank', 'noopener,noreferrer,width=600,height=400');
-    }
-
-    /* ============================================
-       MODAL
-    ============================================ */
-
-    function closeModal() {
-      document.getElementById('announcementModal').classList.remove('open');
-    }
-
-    // Show announcement modal after delay
-    setTimeout(() => {
-      document.getElementById('announcementModal').classList.add('open');
-    }, 2000);
-
-    // Close modal on overlay click
-    document.getElementById('announcementModal').addEventListener('click', function(e) {
-      if (e.target === this) closeModal();
-    });
-
-    // Close modal on Escape key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeModal();
-    });
-  </script>
 </body>
 </html>
