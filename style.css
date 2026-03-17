@@ -606,8 +606,13 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   gap: 20px;
 }
 
-.gallery__item { cursor: pointer; border-radius: var(--radius-lg); overflow: hidden; }
+.gallery__item {
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
 
+/* Image container */
 .gallery__img-wrap {
   position: relative;
   overflow: hidden;
@@ -616,78 +621,100 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   background: var(--bg);
   border: 1px solid var(--border);
 }
-.gallery__img-wrap:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
 
-/* Placeholder colours */
-.gallery__placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-size: .85rem;
-  font-weight: 600;
-  transition: transform .45s var(--ease);
+.gallery__img-wrap:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
 }
-.gallery__placeholder { background: linear-gradient(135deg, #DBEAFE, #EFF6FF); color: var(--primary); }
-.gallery__placeholder--2 { background: linear-gradient(135deg, #D1FAE5, #ECFDF5); color: #059669; }
-.gallery__placeholder--3 { background: linear-gradient(135deg, #FEE2E2, #FFF1F2); color: #E11D48; }
-.gallery__placeholder--4 { background: linear-gradient(135deg, #FEF3C7, #FFFBEB); color: #D97706; }
-.gallery__placeholder--5 { background: linear-gradient(135deg, #F3E8FF, #FAF5FF); color: #7C3AED; }
-.gallery__placeholder--6 { background: linear-gradient(135deg, #CCFBF1, #F0FDFA); color: #0D9488; }
-.gallery__placeholder i { width: 44px; height: 44px; opacity: .6; }
+
+/* ✅ NEW: actual image */
+.gallery__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .5s var(--ease);
+}
 
 /* Overlay */
 .gallery__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(17,24,39,.85) 0%, rgba(17,24,39,.2) 60%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(17,24,39,.85) 0%,
+    rgba(17,24,39,.2) 60%,
+    transparent 100%
+  );
   opacity: 0;
   transition: opacity .35s var(--ease);
   display: flex;
   align-items: flex-end;
   padding: 20px;
 }
-.gallery__overlay-content { width: 100%; }
+
+.gallery__overlay-content {
+  width: 100%;
+}
+
 .gallery__overlay-title {
   color: #fff;
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 700;
   margin-bottom: 4px;
-  transform: translateY(8px);
+  transform: translateY(10px);
   transition: transform .35s var(--ease);
 }
+
 .gallery__overlay-caption {
   color: rgba(255,255,255,.75);
   font-size: .8rem;
-  transform: translateY(8px);
-  transition: transform .35s var(--ease) .04s;
+  transform: translateY(10px);
+  transition: transform .35s var(--ease) .05s;
 }
+
 .gallery__overlay-icon {
   position: absolute;
   top: 14px;
   right: 14px;
-  width: 34px; height: 34px;
+  width: 34px;
+  height: 34px;
   background: rgba(255,255,255,.15);
   backdrop-filter: blur(8px);
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #fff;
   opacity: 0;
   transform: scale(.8);
   transition: opacity .3s, transform .3s var(--ease-spring);
 }
-.gallery__overlay-icon i { width: 16px; height: 16px; }
 
-.gallery__img-wrap:hover .gallery__overlay        { opacity: 1; }
+.gallery__overlay-icon i {
+  width: 16px;
+  height: 16px;
+}
+
+/* 🔥 Hover Effects */
+.gallery__img-wrap:hover .gallery__img {
+  transform: scale(1.1); /* zoom image */
+}
+
+.gallery__img-wrap:hover .gallery__overlay {
+  opacity: 1;
+}
+
 .gallery__img-wrap:hover .gallery__overlay-title,
-.gallery__img-wrap:hover .gallery__overlay-caption { transform: translateY(0); }
-.gallery__img-wrap:hover .gallery__overlay-icon   { opacity: 1; transform: scale(1); }
-.gallery__img-wrap:hover .gallery__placeholder     { transform: scale(1.06); }
+.gallery__img-wrap:hover .gallery__overlay-caption {
+  transform: translateY(0);
+}
 
+.gallery__img-wrap:hover .gallery__overlay-icon {
+  opacity: 1;
+  transform: scale(1);
+}
 /* ── Lightbox ── */
 .lightbox {
   position: fixed;

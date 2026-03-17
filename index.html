@@ -6,25 +6,16 @@
   <title>CCS Week 2026 — Empowering Future Innovators</title>
   <meta name="description" content="Join CCS Week 2026 — a flagship event series empowering the next generation of tech innovators." />
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Lucide Icons (CDN) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.344.0/umd/lucide.min.js" defer></script>
-  <!-- Main Script -->
   <script src="script.js" defer></script>
 </head>
-<body>
-
-  <!-- ============================================================
-       NAVBAR
-  ============================================================ -->
-  <header class="navbar" id="navbar">
+<body><header class="navbar" id="navbar">
     <div class="navbar__inner">
       <a href="#home" class="navbar__logo" aria-label="CCS Week 2026 Home">
         <img src="logo.jpg" alt="CCS Week Logo" class="navbar__logo-mark" />
 
         <span class="navbar__logo-text">CCS WEEK <em>2026</em></span>
       </a>
-
       <nav class="navbar__nav" id="navMenu" role="navigation" aria-label="Main navigation">
         <ul class="navbar__links">
           <li><a href="#home"          class="navbar__link" data-nav>Home</a></li>
@@ -44,15 +35,9 @@
   </header>
 
   <main>
-
-    <!-- ============================================================
-         HERO SECTION
-    ============================================================ -->
     <section class="hero" id="home">
       <div class="hero__bg-grid" aria-hidden="true"></div>
       <div class="container hero__container">
-
-        <!-- Left: Text Content -->
         <div class="hero__content">
           <div class="hero__badge">
             <i data-lucide="calendar-days"></i>
@@ -95,8 +80,6 @@
             </a>
           </div>
         </div>
-
-        <!-- Right: Visual Illustration -->
         <div class="hero__visual" aria-hidden="true">
           <div class="hero__card-stack">
             <div class="hero__float-card hero__float-card--1">
@@ -124,24 +107,15 @@
             </div>
           </div>
         </div>
-
       </div>
-
-      <!-- Decorative wave -->
       <div class="hero__wave" aria-hidden="true">
         <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
           <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="var(--bg)"/>
         </svg>
       </div>
     </section>
-
-    <!-- ============================================================
-     ABOUT SECTION
-============================================================ -->
 <section class="about section" id="about">
   <div class="container about__container">
-
-    <!-- IMAGE -->
     <div class="about__image reveal">
       <div class="about__img-frame">
         <img 
@@ -153,8 +127,6 @@
         <div class="about__img-deco about__img-deco--2"></div>
       </div>
     </div>
-
-    <!-- CONTENT -->
     <div class="about__content reveal">
       <div class="section__eyebrow">
         <i data-lucide="sparkles"></i>
@@ -186,125 +158,82 @@
         </li>
       </ul>
     </div>
-
   </div>
 </section>
-    <!-- ============================================================
-         DOCUMENTATION SECTION (Gallery)
-    ============================================================ -->
-    <section class="documentation section section--alt" id="documentation">
-      <div class="container">
-        <div class="section__header reveal">
-          <div class="section__eyebrow">
-            <i data-lucide="image"></i>
-            Documentation
-          </div>
-          <h2 class="section__title">Memories from Past Events</h2>
-          <p class="section__subtitle">
-            Relive the highlights from previous CCS Week editions — the energy, the
-            creativity, and the camaraderie.
-          </p>
+<div class="gallery" id="gallery">
+  <div class="gallery__item reveal" data-title="Hackathon 2025" data-caption="72-hour non-stop coding battle with over 80 competing teams.">
+    <div class="gallery__img-wrap">
+      <img src="hackaton.png" alt="Hackathon 2025" class="gallery__img">
+      <div class="gallery__overlay">
+        <div class="gallery__overlay-content">
+          <h3 class="gallery__overlay-title">Hackathon 2025</h3>
+          <p class="gallery__overlay-caption">72-hour non-stop coding battle</p>
+          <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
         </div>
-
-        <div class="gallery" id="gallery">
-
-          <div class="gallery__item reveal" data-title="Hackathon 2025" data-caption="72-hour non-stop coding battle with over 80 competing teams.">
-            <div class="gallery__img-wrap">
-              <div class="gallery__placeholder">
-                <i data-lucide="code-2"></i>
-              </div>
-              <div class="gallery__overlay">
-                <div class="gallery__overlay-content">
-                  <h3 class="gallery__overlay-title">Hackathon 2025</h3>
-                  <p class="gallery__overlay-caption">72-hour non-stop coding battle</p>
-                  <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="gallery__item reveal" data-title="AI Exhibit" data-caption="Students showcased machine learning projects and AI-powered prototypes.">
-            <div class="gallery__img-wrap">
-              <div class="gallery__placeholder gallery__placeholder--2">
-                <i data-lucide="brain-circuit"></i>
-              </div>
-              <div class="gallery__overlay">
-                <div class="gallery__overlay-content">
-                  <h3 class="gallery__overlay-title">AI Exhibit</h3>
-                  <p class="gallery__overlay-caption">Machine learning showcases</p>
-                  <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="gallery__item reveal" data-title="Web Dev Cup" data-caption="A fast-paced competition where teams built full-stack apps from scratch in 4 hours.">
-            <div class="gallery__img-wrap">
-              <div class="gallery__placeholder gallery__placeholder--3">
-                <i data-lucide="globe"></i>
-              </div>
-              <div class="gallery__overlay">
-                <div class="gallery__overlay-content">
-                  <h3 class="gallery__overlay-title">Web Dev Cup</h3>
-                  <p class="gallery__overlay-caption">Full-stack speed challenge</p>
-                  <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="gallery__item reveal" data-title="Tech Talk Series" data-caption="Industry leaders and alumni shared insights on emerging technologies.">
-            <div class="gallery__img-wrap">
-              <div class="gallery__placeholder gallery__placeholder--4">
-                <i data-lucide="mic-2"></i>
-              </div>
-              <div class="gallery__overlay">
-                <div class="gallery__overlay-content">
-                  <h3 class="gallery__overlay-title">Tech Talk Series</h3>
-                  <p class="gallery__overlay-caption">Industry leader insights</p>
-                  <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="gallery__item reveal" data-title="Design Sprint" data-caption="UI/UX designers competed to prototype and present solutions in under 6 hours.">
-            <div class="gallery__img-wrap">
-              <div class="gallery__placeholder gallery__placeholder--5">
-                <i data-lucide="pen-tool"></i>
-              </div>
-              <div class="gallery__overlay">
-                <div class="gallery__overlay-content">
-                  <h3 class="gallery__overlay-title">Design Sprint</h3>
-                  <p class="gallery__overlay-caption">UI/UX rapid prototyping</p>
-                  <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="gallery__item reveal" data-title="Awards Night" data-caption="Celebrating the winners, the builders, and everyone who made CCS Week unforgettable.">
-            <div class="gallery__img-wrap">
-              <div class="gallery__placeholder gallery__placeholder--6">
-                <i data-lucide="trophy"></i>
-              </div>
-              <div class="gallery__overlay">
-                <div class="gallery__overlay-content">
-                  <h3 class="gallery__overlay-title">Awards Night</h3>
-                  <p class="gallery__overlay-caption">Celebrating our champions</p>
-                  <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div><!-- /gallery -->
       </div>
-    </section>
-
-    <!-- ============================================================
-         LIGHTBOX MODAL
-    ============================================================ -->
+    </div>
+  </div>
+  <div class="gallery__item reveal" data-title="AI Exhibit" data-caption="Students showcased machine learning projects and AI-powered prototypes.">
+    <div class="gallery__img-wrap">
+      <img src="ai.png" alt="AI Exhibit" class="gallery__img">
+      <div class="gallery__overlay">
+        <div class="gallery__overlay-content">
+          <h3 class="gallery__overlay-title">AI Exhibit</h3>
+          <p class="gallery__overlay-caption">Machine learning showcases</p>
+          <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="gallery__item reveal" data-title="Web Dev Cup" data-caption="A fast-paced competition where teams built full-stack apps from scratch in 4 hours.">
+    <div class="gallery__img-wrap">
+      <img src="webdev.png" alt="Web Dev Cup" class="gallery__img">
+      <div class="gallery__overlay">
+        <div class="gallery__overlay-content">
+          <h3 class="gallery__overlay-title">Web Dev Cup</h3>
+          <p class="gallery__overlay-caption">Full-stack speed challenge</p>
+          <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="gallery__item reveal" data-title="Tech Talk Series" data-caption="Industry leaders and alumni shared insights on emerging technologies.">
+    <div class="gallery__img-wrap">
+      <img src="tech.png" alt="Tech Talk Series" class="gallery__img">
+      <div class="gallery__overlay">
+        <div class="gallery__overlay-content">
+          <h3 class="gallery__overlay-title">Tech Talk Series</h3>
+          <p class="gallery__overlay-caption">Industry leader insights</p>
+          <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="gallery__item reveal" data-title="Design Sprint" data-caption="UI/UX designers competed to prototype and present solutions in under 6 hours.">
+    <div class="gallery__img-wrap">
+      <img src="design.png" alt="Design Sprint" class="gallery__img">
+      <div class="gallery__overlay">
+        <div class="gallery__overlay-content">
+          <h3 class="gallery__overlay-title">Design Sprint</h3>
+          <p class="gallery__overlay-caption">UI/UX rapid prototyping</p>
+          <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="gallery__item reveal" data-title="Awards Night" data-caption="Celebrating the winners, the builders, and everyone who made CCS Week unforgettable.">
+    <div class="gallery__img-wrap">
+      <img src="awards.png" alt="Awards Night" class="gallery__img">
+      <div class="gallery__overlay">
+        <div class="gallery__overlay-content">
+          <h3 class="gallery__overlay-title">Awards Night</h3>
+          <p class="gallery__overlay-caption">Celebrating our champions</p>
+          <span class="gallery__overlay-icon"><i data-lucide="zoom-in"></i></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
     <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview" hidden>
       <div class="lightbox__backdrop" id="lightboxBackdrop"></div>
       <div class="lightbox__content">
@@ -312,7 +241,6 @@
           <i data-lucide="x"></i>
         </button>
         <div class="lightbox__img-wrap" id="lightboxImgWrap">
-          <!-- Dynamic placeholder inserted by JS -->
         </div>
         <div class="lightbox__info">
           <h3 class="lightbox__title" id="lightboxTitle"></h3>
@@ -320,10 +248,6 @@
         </div>
       </div>
     </div>
-
-    <!-- ============================================================
-         SCHEDULE SECTION
-    ============================================================ -->
     <section class="schedule section" id="schedule">
       <div class="container">
         <div class="section__header reveal">
@@ -336,9 +260,7 @@
             Every day packed with something to compete in, learn from, or simply enjoy.
           </p>
         </div>
-
         <div class="timeline">
-
           <div class="timeline__item reveal">
             <div class="timeline__marker">
               <span class="timeline__day">Day 1</span>
@@ -354,7 +276,6 @@
               </div>
             </div>
           </div>
-
           <div class="timeline__item reveal">
             <div class="timeline__marker">
               <span class="timeline__day">Day 2</span>
@@ -370,7 +291,6 @@
               </div>
             </div>
           </div>
-
           <div class="timeline__item reveal">
             <div class="timeline__marker">
               <span class="timeline__day">Day 3</span>
@@ -386,7 +306,6 @@
               </div>
             </div>
           </div>
-
           <div class="timeline__item reveal">
             <div class="timeline__marker">
               <span class="timeline__day">Day 4</span>
@@ -402,7 +321,6 @@
               </div>
             </div>
           </div>
-
           <div class="timeline__item reveal">
             <div class="timeline__marker">
               <span class="timeline__day">Day 5</span>
@@ -418,7 +336,6 @@
               </div>
             </div>
           </div>
-
           <div class="timeline__item reveal">
             <div class="timeline__marker">
               <span class="timeline__day">Day 6</span>
@@ -434,14 +351,9 @@
               </div>
             </div>
           </div>
-
-        </div><!-- /timeline -->
+        </div>
       </div>
     </section>
-
-    <!-- ============================================================
-         REGISTRATION SECTION
-    ============================================================ -->
     <section class="registration section section--alt" id="register">
       <div class="container">
         <div class="section__header reveal">
@@ -455,9 +367,7 @@
             and we'll confirm your slot via email.
           </p>
         </div>
-
         <div class="form-card reveal" id="formCard">
-          <!-- Success State -->
           <div class="form-success" id="formSuccess" hidden>
             <div class="form-success__icon">
               <i data-lucide="circle-check-big"></i>
@@ -472,8 +382,6 @@
               Register Another
             </button>
           </div>
-
-          <!-- Form -->
           <form class="reg-form" id="regForm" novalidate>
             <div class="form-grid">
 
@@ -555,8 +463,7 @@
                 <span class="form-error" id="eventSelectError" role="alert"></span>
               </div>
 
-            </div><!-- /form-grid -->
-
+            </div>
             <div class="form-group form-group--full">
               <label class="form-checkbox">
                 <input type="checkbox" id="agreeTerms" name="agreeTerms" />
@@ -580,10 +487,6 @@
 
       </div>
     </section>
-
-    <!-- ============================================================
-         FINAL CTA SECTION
-    ============================================================ -->
     <section class="cta section">
       <div class="cta__bg" aria-hidden="true"></div>
       <div class="container cta__container reveal">
@@ -601,12 +504,7 @@
         </a>
       </div>
     </section>
-
   </main>
-
-  <!-- ============================================================
-       FOOTER
-  ============================================================ -->
   <footer class="footer">
     <div class="container footer__container">
 
@@ -681,6 +579,5 @@
       </div>
     </div>
   </footer>
-
 </body>
 </html>
